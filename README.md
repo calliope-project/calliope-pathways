@@ -15,7 +15,7 @@ mamba env create -f environment.yml
 As a developer:
 
 ```shell
-mamba create -n calliope-pathways -c conda-forge/label/calliope_dev -c conda-forge -f requirements/base.txt -f requirements/dev.txt
-mamba activate calliope-pathways
+mamba create -n calliope-pathways-dev -c conda-forge/label/calliope_dev -c conda-forge --file requirements/base.txt --file requirements/dev.txt
+mamba activate calliope-pathways-dev
 pip install --no-deps -e .
 ```
