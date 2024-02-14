@@ -1,0 +1,154 @@
+##
+# TECHNOLOGY DEFINITIONS
+##
+
+
+tech_groups:
+  cost_dim_setter:
+    cost_flow_in:
+      data: null
+      index: monetary
+      dims: costs
+    cost_flow_out:
+      data: null
+      index: monetary
+      dims: costs
+    cost_interest_rate:
+      data: 0.10
+      index: monetary
+      dims: costs
+
+  free_transmission:
+    name: "Local power transmission"
+    color: "#6783E3"
+    carrier_in: power
+    carrier_out: power
+    base_tech: transmission
+
+techs:
+  ##
+  # Supply
+  ##
+
+  ccgt:
+    name: "Combined cycle gas turbine"
+    color: "#E37A72"
+    base_tech: supply
+    inherit: cost_dim_setter
+    carrier_out: power
+    flow_out_eff: 0.5
+    flow_cap_max: 40000 # kW
+    flow_ramping: 0.8
+    lifetime: 16
+
+    # pathways specific
+    flow_cap_max_systemwide:
+      # A constraint forcing CCGT phase-out
+      data: [50000, 30000, 20000, 0]
+      index: [2020, 2030, 2040, 2050]
+      dims: investsteps
+    initial_flow_cap: 10000
+    available_initial_cap:
+      data: [1, 0.6, 0, 0]
+      index: [2020, 2030, 2040, 2050]
+      dims: investsteps
+    cost_flow_in:
+      data: [0.02, 0.025, 0.03, 0.05]
+      index: [["monetary", 2020], ["monetary", 2030], ["monetary", 2040], ["monetary", 2050]]
+      dims: [costs, investsteps]
+
+  csp:
+    name: "Concentrating solar power"
+    color: "#F9CF22"
+    base_tech: supply
+    inherit: cost_dim_setter
+    carrier_out: power
+    source_unit: per_area
+    include_storage: True
+    storage_cap_max: 614033
+    flow_cap_per_storage_cap_max: 1
+    storage_loss: 0.002
+    flow_out_eff: 0.4
+    flow_out_parasitic_eff: 0.9
+    area_use_max: .inf
+    flow_cap_max: 20000
+    lifetime: 24
+
+    cost_flow_out.data: 0.002
+
+    available_initial_cap:
+      data: [1, 0.9, 0.3, 0]
+      index: [2020, 2030, 2040, 2050]
+      dims: investsteps
+  ##
+  # Storage
+  ##
+  battery:
+    name: "Battery storage"
+    color: "#3B61E3"
+    base_tech: storage
+    inherit: cost_dim_setter
+    carrier_in: power
+    carrier_out: power
+    storage_cap_max: .inf
+    flow_cap_per_storage_cap_max: 4
+    # 0.95 * 0.95 = 0.9025 round trip efficiency
+    flow_out_eff: 0.95
+    flow_in_eff: 0.95
+    storage_loss: 0 # No loss over time assumed
+    lifetime: 10
+
+    # pathways-specific
+    initial_flow_cap: 0
+    initial_storage_cap: 0
+    flow_cap_new_max:
+      data: [2000, 3000, 6000, 10000]
+      index: [2020, 2030, 2040, 2050]
+      dims: vintagesteps
+
+
+  ##
+  # Demand
+  ##
+  demand_power:
+    name: "Power demand"
+    color: "#072486"
+    base_tech: demand
+    carrier_in: power
+
+  ##
+  # Transmission
+  ##
+
+
+  region1_to_region2:
+    from: region1
+    to: region2
+    name: "AC power transmission"
+    color: "#8465A9"
+    base_tech: transmission
+    inherit: cost_dim_setter
+    carrier_in: power
+    carrier_out: power
+    flow_out_eff: 0.85
+    lifetime: 25
+    flow_cap_max: 10000
+
+    cost_flow_out.data: 0.002
+
+    # pathways-specific
+    initial_flow_cap: 5000
+
+  region1_to_region1_1:
+    from: region1
+    to: region1_1
+    inherit: free_transmission
+  region1_to_region1_2:
+    from: region1
+    to: region1_2
+    inherit: free_transmission
+  region1_to_region1_3:
+    from: region1
+    to: region1_3
+    inherit: free_transmission
+

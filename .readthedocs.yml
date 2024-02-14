@@ -1,0 +1,14 @@
+version: 2
+conda:
+  environment: environment.yml
+build:
+  os: ubuntu-22.04
+  tools:
+    python: mambaforge-4.10
+  jobs:
+    post_create_environment:
+      - mamba install coin-or-cbc --file requirements/dev.txt
+      - python -m ipykernel install --user --name calliope_docs_pathways
+
+mkdocs:
+  configuration: mkdocs.yml

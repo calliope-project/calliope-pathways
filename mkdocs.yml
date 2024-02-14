@@ -1,0 +1,70 @@
+site_name: Calliope Pathway Optimisation
+site_url: https://calliope-pathways.readthedocs.io/
+copyright: Copyright &copy; since 2024 <a href="https://github.com/calliope-project/calliope/blob/main/AUTHORS">Calliope contributors</a> (MIT licensed)
+repo_url: https://github.com/calliope-project/calliope-pathways
+hooks:
+  - docs/hooks/add_notebooks.py
+  - docs/hooks/generate_math_docs.py
+extra:
+  min_python_version: "3.10"
+  max_python_version: "3.12"
+theme:
+  font:
+    text: Lato
+    code: Source Code Pro
+  name: material
+  custom_dir: docs/overrides
+  features:
+    - navigation.indexes
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+extra_css:
+  - css/extra.css
+plugins:
+  - search
+  - autorefs
+  - macros:
+      module_name: docs/hooks/macros
+  - mkdocs-jupyter:
+      include: ["examples/**/*.py", "examples/*.py"]
+      ignore: ["examples/.*/*.py"]
+      allow_errors: false
+      kernel_name: calliope_docs_pathways
+      include_source: True
+      execute: true
+      include_requirejs: true
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - def_list
+  - toc:
+      permalink: "¶"
+      toc_depth: 3
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      preserve_tabs: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.snippets
+  - pymdownx.details
+
+nav:
+  - Home: index.md
+  - Examples and tutorials:
+    - examples/index.md
+    - examples/national_scale.py
+  - Math Documentation:
+    - math/index.md
+  - Contributing: contributing.md
+  - Version history: version_history.md

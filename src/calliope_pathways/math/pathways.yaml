@@ -1,0 +1,364 @@
+constraints:
+  flow_capacity_per_storage_capacity_min:
+    foreach: [nodes, techs, carriers, investsteps]
+
+  flow_capacity_per_storage_capacity_max:
+    foreach: [nodes, techs, carriers, investsteps]
+
+  source_capacity_equals_flow_capacity:
+    foreach: [nodes, techs, carriers, investsteps]
+
+  force_zero_area_use:
+    foreach: [nodes, techs, investsteps]
+
+  area_use_per_flow_capacity:
+    foreach: [nodes, techs, carriers, investsteps]
+
+  area_use_capacity_per_loc:
+    foreach: [nodes, investsteps]
+
+  flow_capacity_systemwide_max:
+    foreach: [techs, carriers, investsteps]
+
+  flow_capacity_systemwide_min:
+    foreach: [techs, carriers, investsteps]
+
+  balance_conversion:
+    foreach: [nodes, techs, timesteps, investsteps]
+
+  flow_out_max:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  flow_out_min:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  flow_in_max:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  source_max:
+    foreach: [nodes, techs, timesteps, investsteps]
+
+  storage_max:
+    foreach: [nodes, techs, timesteps, investsteps]
+
+  storage_discharge_depth_limit:
+    foreach: [nodes, techs, timesteps, investsteps]
+
+  system_balance:
+    foreach: [nodes, carriers, timesteps, investsteps]
+
+  balance_demand:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  balance_demand_min_use:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  balance_supply_no_storage:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  balance_supply_with_storage:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  source_availability_supply:
+    foreach: [nodes, techs, timesteps, investsteps]
+
+  balance_supply_min_use:
+    foreach: [nodes, techs, timesteps, investsteps]
+
+  balance_storage:
+    foreach: [nodes, techs, timesteps, investsteps]
+
+  set_storage_initial:
+    foreach: [nodes, techs, investsteps]
+
+  balance_transmission:
+    foreach: [techs, timesteps, investsteps]
+
+  symmetric_transmission:
+    foreach: [nodes, techs, investsteps]
+
+  export_balance:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  flow_export_max:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  unit_commitment_milp:
+    foreach: [nodes, techs, timesteps, investsteps]
+
+  available_flow_cap_binary:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  available_flow_cap_continuous:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  available_flow_cap_max_binary_continuous_switch:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  flow_out_max_milp:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  flow_in_max_milp:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  flow_out_min_milp:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  storage_capacity_units_milp:
+    foreach: [nodes, techs, carriers, investsteps]
+
+  flow_capacity_units_milp:
+    foreach: [nodes, techs, carriers, investsteps]
+
+  flow_capacity_max_purchase_milp:
+    foreach: [nodes, techs, carriers, investsteps]
+
+  flow_capacity_min_purchase_milp:
+    foreach: [nodes, techs, carriers, investsteps]
+
+  storage_capacity_max_purchase_milp:
+    foreach: [nodes, techs, investsteps]
+
+  storage_capacity_min_purchase_milp:
+    foreach: [nodes, techs, investsteps]
+
+  unit_capacity_max_systemwide_milp:
+    foreach: [techs, investsteps]
+
+  unit_capacity_min_systemwide_milp:
+    foreach: [techs, investsteps]
+
+  async_flow_in_milp:
+    foreach: [nodes, techs, timesteps, investsteps]
+
+  async_flow_out_milp:
+    foreach: [nodes, techs, timesteps, investsteps]
+
+  ramping_up:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  ramping_down:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  flow_cap_bounding:
+    description: >-
+      Flow capacity in a given investment period is the capacity in the previous period
+      plus the new capacity installed minus old capacity that has been decommissioned
+      between the previous period and this one.
+    foreach: [nodes, techs, carriers, investsteps]
+    where: flow_cap
+    equations:
+      - expression: flow_cap == sum(flow_cap_new * available_vintages, over=vintagesteps) + flow_cap_initial * available_initial_cap
+
+  storage_cap_bounding:
+    description: >-
+      Storage capacity in a given investment period is the capacity in the previous period
+      plus the new capacity installed minus old capacity that has been decommissioned
+      between the previous period and this one.
+    foreach: [nodes, techs, investsteps]
+    where: storage_cap
+    equations:
+      - expression: storage_cap == sum(storage_cap_new * available_vintages, over=vintagesteps) + storage_cap_initial * available_initial_cap
+
+  source_cap_bounding:
+    description: >-
+      Storage capacity in a given investment period is the capacity in the previous period
+      plus the new capacity installed minus old capacity that has been decommissioned
+      between the previous period and this one.
+    foreach: [nodes, techs, investsteps]
+    where: source_cap
+    equations:
+      - expression: source_cap == sum(source_cap_new * available_vintages, over=vintagesteps) + source_cap_initial * available_initial_cap
+
+  area_use_bounding:
+    description: >-
+      Area use in a given investment period is the area use in the previous period
+      plus the new area used minus old used area that has been decommissioned
+      between the previous period and this one.
+    foreach: [nodes, techs, investsteps]
+    where: area_use
+    equations:
+      - expression: area_use == sum(area_use_new * available_vintages, over=vintagesteps) + area_use_initial * available_initial_cap
+
+  link_storage_level:
+    description: Link the storage level at the end of one investmentstep to the start of the next.
+    foreach: [nodes, techs, costs, investsteps]
+    where: storage AND NOT investsteps=get_val_at_index(investsteps=0)
+    equations:
+      - expression: >-
+          storage[timesteps=$initial_step] == roll(
+            storage[timesteps=$final_step] * (
+              (1 - storage_loss) ** timestep_resolution[timesteps=$final_step]
+            ),
+            investsteps=1
+          )
+    slices:
+      initial_step:
+        - expression: get_val_at_index(timesteps=0)
+      final_step:
+        - expression: get_val_at_index(timesteps=-1)
+
+variables:
+  flow_cap:
+    foreach: [nodes, techs, carriers, investsteps]
+
+  link_flow_cap:
+    foreach: [techs, investsteps]
+
+  flow_out:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  flow_in:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  flow_export:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  area_use:
+    foreach: [nodes, techs, investsteps]
+
+  source_use:
+    foreach: [nodes, techs, timesteps, investsteps]
+
+  source_cap:
+    foreach: [nodes, techs, investsteps]
+
+  storage_cap:
+    foreach: [nodes, techs, investsteps]
+
+  storage:
+    foreach: [nodes, techs, timesteps, investsteps]
+
+  purchased_units:
+    foreach: [nodes, techs, investsteps]
+
+  operating_units:
+    foreach: [nodes, techs, timesteps, investsteps]
+
+  available_flow_cap:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  async_flow_switch:
+    foreach: [nodes, techs, timesteps, investsteps]
+
+  unmet_demand:
+    foreach: [nodes, carriers, timesteps, investsteps]
+
+  unused_supply:
+    foreach: [nodes, carriers, timesteps, investsteps]
+
+  flow_cap_new:
+    description: >-
+      Additional flow capacity commissioned in an investstep.
+    unit: power
+    where: flow_cap
+    foreach: [nodes, techs, carriers, vintagesteps]
+    bounds:
+      min: 0
+      max: flow_cap_new_max
+
+  storage_cap_new:
+    description: >-
+      Additional storage capacity commissioned in an investstep.
+    unit: energy
+    where: storage_cap
+    foreach: [nodes, techs, vintagesteps]
+    bounds:
+      min: 0
+      max: storage_cap_max
+
+  source_cap_new:
+    description: >-
+      Additional source capacity commissioned in an investstep.
+    unit: power
+    where: source_cap
+    foreach: [nodes, techs, vintagesteps]
+    bounds:
+      min: 0
+      max: source_cap_max
+
+  area_use_new:
+    description: >-
+      Additional area use commissioned in an investstep.
+    unit: area
+    where: area_use
+    foreach: [nodes, techs, vintagesteps]
+    bounds:
+      min: 0
+      max: area_use_max
+
+global_expressions:
+  flow_out_inc_eff:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  flow_in_inc_eff:
+    foreach: [nodes, techs, carriers, timesteps, investsteps]
+
+  cost_var:
+    foreach: [nodes, techs, costs, timesteps, investsteps]
+
+  # these are now decision variables
+  # so they can refer to themselves recursively in a constraint.
+  cost_investment_flow_cap:
+    foreach: [nodes, techs, carriers, costs, investsteps]
+    equations:
+      - where: flow_cap_new
+        expression: sum($cost_sum * flow_cap_new, over=vintagesteps)
+
+  cost_investment_storage_cap:
+    foreach: [nodes, techs, costs, investsteps]
+    equations:
+      - where: storage_cap_new
+        expression: sum(cost_storage_cap * storage_cap_new, over=vintagesteps)
+
+  cost_investment_source_cap:
+    foreach: [nodes, techs, costs, investsteps]
+    equations:
+      - where: source_cap_new
+        expression: sum(cost_source_cap * source_cap_new, over=vintagesteps)
+
+  cost_investment_area_use:
+    foreach: [nodes, techs, costs, investsteps]
+    equations:
+      - where: area_use_new
+        expression: sum(cost_area_use * area_use_new, over=vintagesteps)
+
+  cost_investment_purchase:
+    foreach: [nodes, techs, costs, investsteps]
+
+  cost_investment:
+    foreach: [nodes, techs, costs, investsteps]
+
+  cost:
+    foreach: [nodes, techs, costs, investsteps]
+
+objectives:
+  min_cost_optimisation:
+    equations:
+      - where: "any(cost, over=[nodes, techs, costs, investsteps])"
+        expression: >-
+          sum(
+            sum(
+              sum(cost, over=[nodes, techs])
+              * investstep_resolution,
+              over=investsteps
+            )
+            * objective_cost_weights,
+            over=costs
+          ) + $unmet_demand
+      - where: "NOT any(cost, over=[nodes, techs, costs, investsteps])"
+        expression: $unmet_demand
+    sub_expressions:
+      unmet_demand:
+        - where: "config.ensure_feasibility=True"
+          expression: >-
+            sum(
+              sum(
+                sum(unmet_demand - unused_supply, over=[carriers, nodes]) * timestep_weights,
+                over=timesteps
+              )
+              * investstep_resolution,
+              over=investsteps
+            ) * bigM
+        - where: "NOT config.ensure_feasibility=True"
+          expression: "0"

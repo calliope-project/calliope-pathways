@@ -1,0 +1,57 @@
+
+import: # Import other files from paths relative to this file, or absolute paths
+  - "model_config/techs.yaml" # This file specifies the model's technologies
+  - "model_config/locations.yaml" # This file specifies the model's nodes
+
+# Model configuration: all settings that affect the built model
+config:
+  init:
+    name: National-scale example model
+    # What version of Calliope this model is intended for
+    calliope_version: 0.7.0
+    custom_math: [../../math/pathways.yaml]
+    time_resample: "24h"
+
+  build:
+    ensure_feasibility: true # Switches on the "unmet demand" constraint
+    mode: plan # Choices: plan, operate
+
+  solve:
+    solver: cbc
+    zero_threshold: 1e-10 # Any value coming out of the backend that is smaller than this (due to floating point errors, probably) will be set to zero
+
+parameters:
+  objective_cost_weights:
+    data: 1
+    index: [monetary]
+    dims: costs
+  # `bigM` sets the scale of unmet demand, which cannot be too high, otherwise the optimisation will not converge
+  bigM: 1e6
+
+data_sources:
+  csp_source:
+    source: data_sources/time_varying_params.csv
+    rows: timesteps
+    columns: [comment, nodes, techs, parameters]
+    drop: comment
+
+  demand:
+    source: data_sources/demand.csv
+    rows: timesteps
+    columns: [nodes, techs, parameters, investsteps]
+
+  # Changes in investment costs per investment step.
+  pathway_techs_costs_monetary:
+    source: data_sources/techs_costs_monetary.csv
+    rows: [techs, parameters]
+    columns: vintagesteps
+    add_dimensions:
+      costs: monetary
+
+  # An idea for better handling of "decommissioning", by splitting the available capacity between investment steps
+  vintage_availability:
+    source: data_sources/vintage_availability.csv
+    rows: techs
+    columns: [vintagesteps, investsteps]
+    add_dimensions:
+      parameters: available_vintages

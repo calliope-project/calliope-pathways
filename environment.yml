@@ -1,0 +1,8 @@
+name: calliope-pathways-test
+channels:
+  - conda-forge
+  - conda-forge/label/calliope_dev
+dependencies:
+  - calliope>=0.7.0dev
+  - pip:
+    - "."
