@@ -68,7 +68,7 @@ where = ["src"]
 include = ["calliope*"]
 
 [tool.setuptools.package-data]
-calliope = ["models/**/*", "math/*"]
+calliope = ["models/**/*", "math/*", "config/*"]
 
 [tool.setuptools]
 license-files = ["LICENSE"]

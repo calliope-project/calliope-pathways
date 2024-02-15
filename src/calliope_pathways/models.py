@@ -16,9 +16,9 @@ from calliope.model import Model
 from calliope.util import schema
 
 MODEL_DIR = Path(importlib.resources.files("calliope_pathways") / "models")
-MATH_DIR = Path(importlib.resources.files("calliope_pathways") / "math")
+CONFIG_DIR = Path(importlib.resources.files("calliope_pathways") / "config")
 
-new_schema = AttrDict.from_yaml(MATH_DIR / "new_param_schema.yaml")
+new_schema = AttrDict.from_yaml(CONFIG_DIR / "new_param_schema.yaml")
 
 for key, new_params in new_schema.items():
     schema.update_model_schema(key, new_params, allow_override=False)

@@ -1,1 +1,1 @@
-calliope>=0.7.0dev2
+calliope>=0.7.0dev3
