@@ -48,6 +48,7 @@ jobs:
         environment-name: ${{ github.event.repository.name }}-${{ matrix.os }}-3${{ matrix.py3version }}-${{ hashFiles('requirements/dev.txt') }}
         environment-file: requirements/base.txt
         create-args: >-
+          -c conda-forge/label/calliope_dev
           -f requirements/dev.txt
           curl
           python=3.${{ matrix.py3version }}
