@@ -65,10 +65,10 @@ quiet-level = 3
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["calliope*"]
+include = ["calliope_pathways*"]
 
 [tool.setuptools.package-data]
-calliope = ["models/**/*", "math/*", "config/*"]
+calliope_pathways = ["models/**/*", "math/*", "config/*"]
 
 [tool.setuptools]
 license-files = ["LICENSE"]
