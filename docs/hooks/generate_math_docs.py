@@ -92,10 +92,10 @@ def write_file(
     nav_reference = [
         idx
         for idx in config["nav"]
-        if isinstance(idx, dict) and set(idx.keys()) == {"Math documentation"}
+        if isinstance(idx, dict) and set(idx.keys()) == {"Math Documentation"}
     ][0]
 
-    nav_reference["Math documentation"].append(output_file.as_posix())
+    nav_reference["Math Documentation"].append(output_file.as_posix())
 
     math_doc = model.math_documentation.write(format="md", mkdocs_tabbed=True)
     file_to_download = Path("..") / filename

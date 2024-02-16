@@ -34,6 +34,28 @@ plugins:
       include_source: True
       execute: true
       include_requirejs: true
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            show_bases: true
+            filters:
+              - "!^_"
+            heading_level: 1
+            show_root_heading: true
+            merge_init_into_class: true
+            show_if_no_docstring: true
+            signature_crossrefs: true
+            show_root_toc_entry: false
+            show_signature_annotations: false
+            inherited_members: true
+          paths: [src]
+          import:
+            - https://docs.python.org/3/objects.inv
+            - https://pandas.pydata.org/docs/objects.inv
+            - https://docs.xarray.dev/en/stable/objects.inv
+            - https://calliope.readthedocs.io/en/latest/objects.inv
 markdown_extensions:
   - admonition
   - attr_list

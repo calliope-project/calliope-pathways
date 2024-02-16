@@ -47,16 +47,6 @@ techs:
       Sets `storage_cap` lower bound in first investment period during pathway optimisation.
     x-unit: energy.
 
-
-  storage_initial:
-    $ref: "#/$defs/TechParamNullNumber"
-    default: 0
-    x-type: float
-    title: Initial storage level.
-    description: >-
-      Set stored flow in device at the first timestep, as a fraction of total storage capacity.
-    x-unit: fraction.
-
   source_cap_initial:
     $ref: "#/$defs/TechParamNullNumber"
     default: 0
