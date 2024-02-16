@@ -16,7 +16,8 @@
 # %% [markdown]
 # # National scale example model pathway optimisation
 #
-# In this tutorial, we use the national scale example model to solve a pathway optimisation problem.
+# In this tutorial, we use the Calliope national scale example model to solve a pathway optimisation problem.
+# This model can be loaded in its non-pathway format within Calliope as `calliope.examples.national_scale()`.
 
 # %%
 
