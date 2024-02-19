@@ -1,0 +1,79 @@
+##
+# nodes
+##
+
+nodes:
+  # Import/export regions
+  EUC:
+    techs: [import_power, export_power]
+    latitude: 46.382945
+    longitude: 8.756699
+  GRE:
+    techs: [import_power, export_power]
+    latitude: 39.430745
+    longitude: 20.610642
+  # Italy regions
+  NORD:
+    techs: ['ccgt', 'hydropower', 'demand_power', 'wind', 'pv', 'battery_phs', 'waste', 'bioenergy']
+    latitude: 45.219847
+    longitude: 9.624722
+  CNOR:
+    techs: ['ccgt', 'hydropower', 'demand_power', 'wind', 'pv', 'oil', 'geothermal', 'waste', 'bioenergy', 'coal']
+    latitude: 43.460750
+    longitude: 11.861967
+  CSUD:
+    techs: ['ccgt', 'hydropower', 'demand_power', 'wind', 'pv', 'coal', 'waste', 'bioenergy', 'battery_phs']
+    latitude: 41.634090
+    longitude: 13.335471
+  SUD:
+    techs: ['ccgt', 'hydropower', 'demand_power', 'wind', 'pv', 'waste', 'bioenergy', 'coal', 'oil']
+    latitude: 40.678274
+    longitude: 16.597098
+  SICI:
+    techs: ['ccgt', 'hydropower', 'demand_power', 'wind', 'pv', 'oil', 'battery_phs', 'bioenergy']
+    latitude: 37.511642
+    longitude: 15.085379
+  SARD:
+    techs: ['ccgt', 'hydropower', 'demand_power', 'wind', 'pv', 'coal', 'oil', 'battery_phs', 'waste', 'bioenergy']
+    latitude: 40.302551
+    longitude: 9.319396
+
+  # --8<-- [start:region-1]
+  region1:
+    latitude: 46.382945
+    longitude: 8.756699
+    techs:
+      demand_power:
+      ccgt:
+        flow_cap_max: 30000 # increased to ensure no unmet_demand in first timestep
+  # --8<-- [end:region-1]
+  # --8<-- [start:other-locs]
+  region2:
+    latitude: 40
+    longitude: -8
+    techs:
+      demand_power:
+      battery:
+
+  region1_1:
+    inherit: csp_regions
+    latitude: 41
+    longitude: -2
+
+  region1_2:
+    inherit: csp_regions
+    latitude: 39
+    longitude: -1
+
+  region1_3:
+    inherit: csp_regions
+    latitude: 39
+    longitude: -2
+# --8<-- [end:other-locs]
+
+# --8<-- [start:node-groups]
+node_groups:
+  csp_regions:
+    techs:
+      csp:
+# --8<-- [end:node-groups]

@@ -1,0 +1,102 @@
+# Import other files from paths relative to this file, or absolute paths
+import:
+  - "model_config/techs.yaml" # This file specifies the model's technologies
+  - "model_config/locations.yaml" # This file specifies the model's nodes
+  # - "scenarios.yaml" # Scenario and override group definitions
+
+
+# Model configuration: all settings that affect the built model
+config:
+  init:
+    name: "Stationary capacity expansion problem: conditions kept constant over the years."
+    # What version of Calliope this model is intended for
+    calliope_version: 0.7.0
+    # Activate pathways configuration
+    add_math: [../../math/pathways.yaml]
+    time_resample: "24h"
+
+  build:
+    ensure_feasibility: true # Switches on the "unmet demand" constraint
+    mode: plan # Choices: plan, operate
+
+  solve:
+    solver: gurobi
+    zero_threshold: 1e-10 # Any value coming out of the backend that is smaller than this (due to floating point errors, probably) will be set to zero
+    solver_options: # Taken directly from Lombardi's study
+      Method: 2
+      Crossover: -0
+      BarConvTol: 1e-4
+      BarHomogeneous: 1
+      BarIterLimit: 3000
+      OptimalityTol: 1e-4
+      FeasibilityTol: 1e-4
+
+
+parameters:
+  objective_cost_weights:
+    data: 1
+    index: [monetary]
+    dims: costs
+  # `bigM` sets the scale of unmet demand, which cannot be too high, otherwise the optimisation will not converge
+  bigM: 1e6
+  investstep_resolution:
+    data: 10
+    index: [2020, 2030, 2040, 2050]
+    dims: investsteps
+
+data_sources:
+  # Initial installed capacity
+  initial_tech_capacity_params:
+    source: data_sources/inital_capacity_techs_kw.csv
+    columns: [nodes, techs, parameters]
+  initial_transmission_capacity_params:
+    source: data_sources/initial_capacity_transmission_kw.csv
+    columns: [nodes, techs, parameters]
+  maximum_capacity_params:
+    source: data_sources/max_capacity_techs_kw.csv
+    columns: [nodes, techs, parameters]
+
+  # VRE generation data
+  # Opposite to Lombardi's study, we force Hydro inflow use, and allow renewable curtailment
+  pv_source_max: # allows curtailment
+    source: data_sources/timestep_series/pv_series.csv
+    rows: timesteps
+    columns: [comment, nodes, techs, parameters]
+    drop: comment
+  wind_source_max: # allows curtailment
+    source: data_sources/timestep_series/wind_series.csv
+    rows: timesteps
+    columns: [comment, nodes, techs, parameters]
+    drop: comment
+  hydro_source_use_equals: # forces resource use
+    source: data_sources/timestep_series/hydro_reservoirs.csv
+    rows: timesteps
+    columns: [comment, nodes, techs, parameters]
+    drop: comment
+
+  # Demand data
+  power_demand_source_use_equals:
+    source: data_sources/timestep_series/regional_demand_series.csv
+    rows: timesteps
+    columns: nodes
+    add_dimensions:
+      techs: demand_power
+      parameters: sink_use_equals
+
+  # Import/export cost data
+  power_import_cost_flow_out:
+    source: data_sources/timestep_series/import_price.csv
+    rows: timesteps
+    columns: [comment, nodes, techs]
+    drop: comment
+    add_dimensions:
+      costs: monetary
+      parameters: cost_flow_out
+  power_export_cost_flow_in:
+    source: data_sources/timestep_series/export_price.csv
+    rows: timesteps
+    columns: [comment, nodes, techs]
+    drop: comment
+    add_dimensions:
+      costs: monetary
+      parameters: cost_flow_in

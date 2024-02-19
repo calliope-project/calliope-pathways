@@ -1,0 +1,296 @@
+##
+# TECHNOLOGY DEFINITIONS
+# References
+# Lombardi: 10.1016/j.joule.2020.08.002
+# RSE: https://www.mase.gov.it/sites/default/files/archivio/allegati/rse_decarbonizzazione_web.pdf
+# IEA: https://iea.blob.core.windows.net/assets/c9bae6ac-0f4c-4a4b-8b46-f7d4cca4d53b/ElecCost2015.pdf
+##
+
+# TODO: Francesco omitted CAPEX for most technologies. Get values from the IRENA report.
+
+tech_groups:
+  cost_dim_setter:
+    cost_flow_cap:
+      data: null
+      index: monetary
+      dims: costs
+    cost_om_annual:
+      data: null
+      index: monetary
+      dims: costs
+    cost_flow_in:
+      data: null
+      index: monetary
+      dims: costs
+    cost_flow_out:
+      data: null
+      index: monetary
+      dims: costs
+    cost_storage_cap:
+      data: null
+      index: monetary
+      dims: costs
+    cost_area_use:
+      data: null
+      index: monetary
+      dims: costs
+    cost_source_cap:
+      data: null
+      index: monetary
+      dims: costs
+    cost_interest_rate:
+      data: 0.10
+      index: monetary
+      dims: costs
+
+  inter_zonal_transmission:
+    name: "Transmission intra-zonal electricity"
+    color: '#966F9E'
+    carrier_in: power
+    carrier_out: power
+    base_tech: transmission
+    lifetime: 40
+    flow_out_eff: 0.96
+    cost_interest_rate:
+      data: 0.10
+      index: monetary
+      dims: costs
+    cost_flow_out:
+      data: 0.0022  # EUR2010/kWh, from Lombardi
+      index: monetary
+      dims: costs
+
+techs: # Color scheme is Tol Qual Muted + some extras
+  ##
+  # Supply data, all values from Lombardi's paper.
+  ##
+  geothermal:
+    name: "Traditional geothermal energy"
+    color: '#873737'
+    base_tech: supply
+    inherit: cost_dim_setter
+    carrier_out: power
+    lifetime: 50
+
+    cost_flow_cap.data: 4062 # EUR2010/kW lower than average IRENA cost in 2022USD normalized to EUR2010 for Italy.
+    cost_om_annual.data: 77 # EUR2010/kW/yr
+
+  hydropower: # merged reservoir+basin and RoR, average values
+    name: "Hydropower"
+    color: '#64D7CE'
+    base_tech: supply
+    inherit: cost_dim_setter
+    carrier_out: power
+    include_storage: true  # TODO: unclear how to make this work
+    source_unit: per_cap
+    source_eff: 0.635
+    lifetime: 55
+
+    # from RSE, averaged 2015 estimates (2020 for RoR)
+    cost_flow_cap.data: 4022 # EUR2010/kW
+    cost_om_annual.data: 73 # EUR2010/kW/yr
+
+  waste:
+    name: "Waste to energy plant"
+    color: '#6A0241'
+    base_tech: supply
+    inherit: cost_dim_setter
+    carrier_out: power
+    flow_out_eff: 0.28
+    lifetime: 20
+
+    # from RSE, 2015 estimates for electric-only
+    cost_flow_cap.data: 3743 # EUR2010/kW
+    cost_om_annual.data: 348 # EUR2010/kW/yr
+    # from Lombardi
+    cost_flow_in.data: -0.1305 # EUR2010/kWh
+    cost_flow_out.data: 0.03305 # EUR2010/kWh
+
+  bioenergy:
+    name: "Biogas, biofuel and biomass power generation"
+    color: '#5AA24D'
+    base_tech: supply
+    inherit: cost_dim_setter
+    carrier_out: power
+    flow_out_eff: 0.29
+    lifetime: 18 # average in Lombardi's study
+
+    # from RSE, averaged solid, gas and liquid
+    cost_flow_cap.data: 4137 # EUR2010/kW
+    cost_om_annual.data: 185 # EUR2010/kW/yr
+    # from Lombardi, averaged solid, gas and liquid
+    cost_flow_in.data: 0.1367 # EUR2010/kW
+    cost_flow_out.data: 0.0177 # EUR2010/kWh
+
+  oil:
+    name: 'Oil and other fossil fuels plant'
+    color: '#000000'
+    base_tech: supply
+    inherit: cost_dim_setter
+    carrier_out: power
+    flow_out_eff: 0.35
+    flow_ramping: 0.6
+    lifetime: 35
+
+    # IEA
+    cost_flow_cap.data: 490 # EUR2010/kW, assumed -> overnight OCGT plant median
+    # Lombardi
+    cost_flow_in.data: 0.01 # EUR2010/kW
+    cost_flow_out.data: 0.023 # EUR2010/kWh
+    cost_om_annual.data: 32 # EUR2010/kW/yr
+
+  coal:
+    name: 'Coal plant'
+    color: '#5A5A5A'
+    base_tech: supply
+    inherit: cost_dim_setter
+    carrier_out: power
+    flow_out_eff: 0.38
+    flow_ramping: 0.6
+    lifetime: 35
+
+    # IEA
+    cost_flow_cap.data: 1584 # EUR2010/kW, overnight median
+    # Lombardi
+    cost_flow_in.data: 0.00946 # EUR2010/kW
+    cost_flow_out.data: 0.023 # EUR2010/kWh
+    cost_om_annual.data: 32 # EUR2010/kW/yr
+
+  ccgt:
+    name: 'Combined cycle gas turbine'
+    color: '#A5A5A5'
+    base_tech: supply
+    inherit: cost_dim_setter
+    carrier_out: power
+    flow_out_eff: 0.56
+    flow_ramping: 0.8
+    lifetime: 20
+
+    # IEA
+    cost_flow_cap.data: 709 # EUR2010/kW, overnight median
+    # Lombardi
+    cost_flow_in.data: 0.0291 # EUR2010/kWh
+    cost_flow_out.data: 0.00315 # EUR2010/kWh
+    cost_om_annual.data: 10.5 # EUR2010/kW/yr
+
+  wind:
+    name: 'On-shore wind power'  # TODO: fix source
+    color: '#47D154'
+    base_tech: supply
+    inherit: cost_dim_setter
+    carrier_out: power
+    source_unit: per_cap
+    lifetime: 20
+
+    # RSE, 2015 values
+    cost_flow_cap.data: 1451 # EUR2010/kW
+    cost_om_annual.data: 38 # EUR2010/kW/yr
+
+  pv:
+    name: "Photovoltaic power"  # TODO: fix source
+    color: '#DDCC77'
+    base_tech: supply
+    inherit: cost_dim_setter
+    carrier_out: power
+    source_unit: per_cap
+    lifetime: 22
+
+    # from RSE, 2015 estimate
+    cost_flow_cap.data: 1322 # EUR2010/kW
+    cost_om_annual.data: 24 # EUR2010/kW/yr
+
+  battery_li:
+    name: "Li-ion battery storage"
+    color: '#882255'
+    base_tech: storage
+    inherit: cost_dim_setter
+    carrier_in: power
+    carrier_out: power
+    flow_cap_max: # kW
+    storage_cap_max: 2e+8
+    flow_cap_per_storage_cap_max: 0.25
+    flow_out_eff: 0.98
+    flow_in_eff: 0.98
+    lifetime: 15
+
+    initial_flow_cap: 0
+
+    # Lombardi
+    cost_storage_cap.data: 433 # EUR2010/kWh storage capacity
+    cost_om_annual.data: 7.22 # EUR2010/kW/yr
+    cost_flow_out.data: 0.0022 # EUR2010/kWh
+
+  battery_phs:
+    name: "Pump-hydro storage"
+    color: "#332288"
+    base_tech: storage
+    inherit: cost_dim_setter
+    carrier_in: power
+    carrier_out: power
+    flow_cap_max: # kW
+    flow_out_eff: 0.97
+    flow_in_eff: 0.87
+    lifetime: 50
+
+    # RSE, average of 2020 (no 2015 data)
+    cost_storage_cap.data:  3218 # EUR2010/kWh storage capacity
+    cost_om_annual.data: 45 # EUR2010/kW/yr
+
+  ##
+  # Demand, imports, exports
+  ##
+  demand_power:
+    name: "Power demand"
+    color: "#072486"
+    base_tech: demand
+    carrier_in: power
+
+  import_power:
+    name: "Power imports"
+    color: '#E68A31'
+    base_tech: supply
+    carrier_out: power
+
+  export_power:
+    name: "Power exports"
+    color: '#E68A31'
+    base_tech: demand
+    carrier_in: power
+
+  ##
+  # Transmission
+  ##
+  # Inside Italy
+  ac_NORD_to_CNOR:
+    inherit: inter_zonal_transmission
+    from: NORD
+    to: CNOR
+  ac_CNOR_to_CSUD:
+    inherit: inter_zonal_transmission
+    from: CNOR
+    to: CSUD
+  ac_CNOR_to_SARD:
+    inherit: inter_zonal_transmission
+    from: CNOR
+    to: SARD
+  ac_CSUD_to_SARD:
+    inherit: inter_zonal_transmission
+    from: CSUD
+    to: SARD
+  ac_CSUD_SUD:
+    inherit: inter_zonal_transmission
+    from: CSUD
+    to: SUD
+  ac_SUD_to_SICI:
+    inherit: inter_zonal_transmission
+    from: SUD
+    to: SICI
+  # Outside Italy
+  ac_NORD_to_EUC:
+    inherit: inter_zonal_transmission
+    from: NORD
+    to: EUC
+  ac_SUD_to_GRE:
+    inherit: inter_zonal_transmission
+    from: SUD
+    to: GRE
