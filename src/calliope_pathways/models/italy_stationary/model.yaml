@@ -48,13 +48,13 @@ data_sources:
   # Initial installed capacity
   initial_tech_capacity_params:
     source: data_sources/inital_capacity_techs_kw.csv
-    columns: [nodes, techs, parameters]
+    rows: [nodes, techs, parameters]
   initial_transmission_capacity_params:
     source: data_sources/initial_capacity_transmission_kw.csv
-    columns: [nodes, techs, parameters]
+    rows: [techs, parameters]
   maximum_capacity_params:
     source: data_sources/max_capacity_techs_kw.csv
-    columns: [nodes, techs, parameters]
+    rows: [nodes, techs, parameters]
 
   # VRE generation data
   # Opposite to Lombardi's study, we force Hydro inflow use, and allow renewable curtailment
@@ -85,7 +85,7 @@ data_sources:
 
   # Import/export cost data
   power_import_cost_flow_out:
-    source: data_sources/timestep_series/import_price.csv
+    source: data_sources/timestep_series/import_price_series.csv
     rows: timesteps
     columns: [comment, nodes, techs]
     drop: comment
@@ -93,7 +93,7 @@ data_sources:
       costs: monetary
       parameters: cost_flow_out
   power_export_cost_flow_in:
-    source: data_sources/timestep_series/export_price.csv
+    source: data_sources/timestep_series/export_price_series.csv
     rows: timesteps
     columns: [comment, nodes, techs]
     drop: comment
