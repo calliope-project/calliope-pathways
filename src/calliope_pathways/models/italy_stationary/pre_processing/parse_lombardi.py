@@ -101,7 +101,7 @@ def parse_cap_max(input_path: str, csv_out_path: str, frozen_techs: list) -> Non
         if not tech_df.empty:
             tech_df["parameters"] = tech_df["parameters"].replace(FREEZE_CONVERT)
             frozen_cap_df = pd.concat([frozen_cap_df, tech_df])
-    frozen_cap_df.to_csv(csv_out_path)
+    frozen_cap_df.to_csv(csv_out_path, index=False)
 
 
 def get_techs_per_node(input_yaml_path: str) -> dict:
@@ -123,11 +123,12 @@ def get_techs_per_node(input_yaml_path: str) -> dict:
 
 
 if __name__ == "__main__":
-    input_path = "./datasets/locations_lombardi.yaml"
-    installed_path = "pathways_stationary/pathways_data/inital_capacity_techs_kw.csv"
-    parse_initial_cap(input_path, installed_path)
-    frozen_path = "pathways_stationary/pathways_data/max_capacity_techs_kw.csv"
-    frozen_tech = ["geothermal", "battery_phs", "hydropower", "waste"]
-    parse_cap_max(installed_path, frozen_path, frozen_tech)
+    input_path = "src/calliope_pathways/models/italy_stationary/pre_processing/locations_lombardi.yaml"
+    initial_cap_path = "src/calliope_pathways/models/italy_stationary/data_sources/inital_capacity_techs_kw.csv"
+    parse_initial_cap(input_path, initial_cap_path)
+
+    frozen_path = "src/calliope_pathways/models/italy_stationary/data_sources/max_capacity_techs_kw.csv"
+    frozen_techs = ["geothermal", "battery_phs", "hydropower", "waste"]
+    parse_cap_max(initial_cap_path, frozen_path, frozen_techs)
     print(get_techs_per_node(input_path))
 

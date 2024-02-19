@@ -207,7 +207,7 @@ techs: # Color scheme is Tol Qual Muted + some extras
     carrier_in: power
     carrier_out: power
     flow_cap_max: # kW
-    storage_cap_max: 2e+8
+    storage_cap_max: 2e8
     flow_cap_per_storage_cap_max: 0.25
     flow_out_eff: 0.98
     flow_in_eff: 0.98

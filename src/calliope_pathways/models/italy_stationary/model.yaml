@@ -13,7 +13,7 @@ config:
     calliope_version: 0.7.0
     # Activate pathways configuration
     add_math: [../../math/pathways.yaml]
-    time_resample: "24h"
+    time_resample: "48h"
 
   build:
     ensure_feasibility: true # Switches on the "unmet demand" constraint
@@ -69,7 +69,7 @@ data_sources:
     columns: [comment, nodes, techs, parameters]
     drop: comment
   hydro_source_use_equals: # forces resource use
-    source: data_sources/timestep_series/hydro_reservoirs.csv
+    source: data_sources/timestep_series/hydro_reservoir_series.csv
     rows: timesteps
     columns: [comment, nodes, techs, parameters]
     drop: comment
