@@ -1,8 +1,20 @@
 """List of lazy parsing scripts to convert files from Lombardi's study."""
+import random
+
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+from scipy.special import gamma
 from yaml import safe_load
 
-NODE_GROUPS = {
+# Weibull settings
+SEED = 7000
+BETA_MIN = 3
+BETA_MAX = 8
+AGE_FACTOR_MIN = 0.1
+AGE_FACTOR_MAX = 0.8
+
+NODE_GROUPING = {
     "NORD": [f"R{i}" for i in range(1, 9)],
     "CNOR": [f"R{i}" for i in range(9, 12)],
     "CSUD": [f"R{i}" for i in range(12, 15)],
@@ -11,9 +23,9 @@ NODE_GROUPS = {
     "SARD": [],
 }
 
-NODE_GROUPS = {k: [k] + i for k, i in NODE_GROUPS.items()}
+NODE_GROUPING = {k: [k] + i for k, i in NODE_GROUPING.items()}
 
-TECH_GROUPS = {
+TECH_GROUPING = {
     "ccgt": ["ccgt"],
     "hydropower": ["hydro_dam", "hydro_ror"],
     "wind": ["wind"],
@@ -26,109 +38,186 @@ TECH_GROUPS = {
     "coal": ["coal", "coal_usc"],
 }
 
-PARAM_GROUPS = {
+PARAM_V068_TO_V07 = {
     "initial_flow_cap": ["energy_cap_equals", "energy_cap_max"],
     "initial_storage_cap": ["storage_cap_equals"],
 }
 
-FREEZE_CONVERT = {
+PARAM_INI_TO_MAX = {
     "initial_flow_cap": "flow_cap_max",
     "initial_storage_cap": "storage_cap_max"
 }
 
-CALLIOPE_COLS = ["nodes", "techs", "parameters", "values"]
+BASIC_V07_COLS = ["nodes", "techs", "parameters", "values"]
 
 
-def _build_location_df(path: str) -> pd.DataFrame:
+def _location_yaml_to_df(path: str, calliope_version: str="0.6.8") -> pd.DataFrame:
+    """Converts a location yaml into a searchable dataframe."""
     # Read yaml file
     with open(path, "r") as file:
         yaml_data = safe_load(file)
-    yaml_df = pd.json_normalize(yaml_data["locations"])
-    yaml_df = yaml_df.T.reset_index()
-    yaml_df.columns = ["command", "value"]
+    if calliope_version == "0.6.8":
+        yaml_df = pd.json_normalize(yaml_data["locations"])
+        yaml_df = yaml_df.T.reset_index()
+        yaml_df.columns = ["commands", "value"]
 
-    # Arrange commands into something sensible
-    command_split = ["node", "node attribute", "item", "item attribute", "parameter"]
-    yaml_df[command_split] = yaml_df["command"].str.split(".", expand=True)
-    yaml_df = yaml_df.drop(columns="command")
+        # Arrange commands into something sensible
+        command_split = ["nodes", "node attributes", "items", "item attributes", "parameters"]
+        yaml_df[command_split] = yaml_df["commands"].str.split(".", expand=True)
+        yaml_df = yaml_df.drop(columns="commands")
+    else:
+        raise ValueError(f"Version {calliope_version} not supported.")
     return yaml_df
 
+def _build_tech_df(yml_path: str, calliope_version: str="0.7") -> pd.DataFrame:
+    """Converts a tech yaml into a searchable dataframe."""
+    # Read yaml file
+    with open(yml_path, "r") as file:
+        yaml_data = safe_load(file)
+    if calliope_version == "0.7":
+        yaml_df = pd.json_normalize(yaml_data["techs"])
+        yaml_df = yaml_df.T.reset_index()
+        yaml_df.columns = ["commands", "value"]
 
-def _test_group_completion(col: pd.Series, group_dict: dict) -> bool:
+        # Arrange commands into something sensible
+        command_split = ["techs", "parameters"]
+        yaml_df = yaml_df[~yaml_df["commands"].str.contains("cost")]
+        yaml_df[command_split] = yaml_df["commands"].str.split(".", expand=True)
+        yaml_df = yaml_df.drop(columns="commands")
+    else:
+        raise ValueError(f"Version {calliope_version} not supported.")
+    return yaml_df
+
+def _weibull(year: int, lifetime: float, shape: float, year_shift: int=0) -> float:
+    """A Weibull probability distribution, see 10.1186/s12544-020-00464-0."""
+    return np.exp(-(((year+year_shift)/lifetime)**shape) * gamma(1+1/shape)**shape)
+
+def __test_group_completion(col: pd.Series, group_dict: dict) -> bool:
     """Check if a group dictionary covers all the possible values of a column."""
     return sorted(col.unique()) == sorted([i for j in group_dict.values() for i in j])
 
+# def get_techs_per_node(input_yaml_path: str) -> dict:
+#     """Get a dictionary specifying the technologies installed in a given region.
 
-def parse_initial_cap(input_yaml_path: str, csv_out_path: str) -> None:
+#     Args:
+#         input_path (str): path to Lombardi's location.yaml
+
+#     Returns:
+#         dict: containing {node: [techs]}
+#     """
+#     loc_yaml_df = _location_yaml_to_df(input_yaml_path)
+#     loc_tech_df = loc_yaml_df[loc_yaml_df["node attributes"] == "techs"]
+
+#     replace_dict = {v: k for k, values in TECH_GROUPING.items() for v in values}
+#     loc_tech_df["items"] = loc_tech_df["items"].replace(replace_dict)
+
+#     return {n: loc_tech_df[loc_tech_df["nodes"].isin(n_group)]["items"].unique() for n, n_group in NODE_GROUPING.items()}
+
+def parse_initial_cap(loc_yml_path: str, calliope_version="0.6.8") -> pd.DataFrame:
     """Extract initial installed capacity (2015 values)."""
-    yaml_df = _build_location_df(input_yaml_path)
+    loc_yaml_df = _location_yaml_to_df(loc_yml_path, calliope_version)
 
-    # Build a dataframe with numeric tech parameters
-    tech_old_df = yaml_df[
-        (yaml_df["node attribute"] == "techs")
-        & (yaml_df["item attribute"] == "constraints")
-        & (yaml_df["parameter"] != "resource")
+    # Find exclusively numeric teach params in each location
+    loc_tech_df = loc_yaml_df[
+        (loc_yaml_df["node attributes"] == "techs")
+        & (loc_yaml_df["item attributes"] == "constraints")
+        & (loc_yaml_df["parameters"] != "resource")
     ]
 
     # Run tests
-    assert pd.to_numeric(tech_old_df["value"], errors="coerce").notnull().all(), "Invalid numeric values"
-    assert _test_group_completion(tech_old_df["node"], NODE_GROUPS), "Missing nodes in group"
-    assert _test_group_completion(tech_old_df["item"], TECH_GROUPS), "Missing techs in group"
-    assert _test_group_completion(tech_old_df["parameter"], PARAM_GROUPS), "Missing parameters in group"
+    assert pd.to_numeric(loc_tech_df["value"], errors="coerce").notnull().all(), "Invalid numeric values"
+    assert __test_group_completion(loc_tech_df["nodes"], NODE_GROUPING), "Missing nodes in group"
+    assert __test_group_completion(loc_tech_df["items"], TECH_GROUPING), "Missing techs in group"
+    assert __test_group_completion(loc_tech_df["parameters"], PARAM_V068_TO_V07), "Missing parameters in group"
 
     # build initial capacity datafile
-    initial_cap_df = pd.DataFrame(columns=CALLIOPE_COLS)
+    ini_cap_df = pd.DataFrame(columns=BASIC_V07_COLS)
 
-    for n, n_group in NODE_GROUPS.items():
-        node_df = tech_old_df[tech_old_df["node"].isin(n_group)]
-        for t, t_group in TECH_GROUPS.items():
-            tech_df = node_df[node_df["item"].isin(t_group)]
-            for p, p_group in PARAM_GROUPS.items():
-                param_df = tech_df[tech_df["parameter"].isin(p_group)]
+    for n, n_group in NODE_GROUPING.items():
+        node_df = loc_tech_df[loc_tech_df["nodes"].isin(n_group)]
+        for t, t_group in TECH_GROUPING.items():
+            tech_df = node_df[node_df["items"].isin(t_group)]
+            for p, p_group in PARAM_V068_TO_V07.items():
+                param_df = tech_df[tech_df["parameters"].isin(p_group)]
                 if not param_df.empty:
-                    aggregated_data = pd.Series(data=[n, t, p, param_df["value"].sum()], index=CALLIOPE_COLS)
-                    initial_cap_df.loc[len(initial_cap_df.index)] = aggregated_data
+                    aggregated_data = pd.Series(data=[n, t, p, param_df["value"].sum()], index=BASIC_V07_COLS)
+                    ini_cap_df.loc[len(ini_cap_df.index)] = aggregated_data
 
-    initial_cap_df.to_csv(csv_out_path, index=False)
+    return ini_cap_df
 
-def parse_cap_max(input_path: str, csv_out_path: str, frozen_techs: list) -> None:
+def parse_cap_max(ini_cap_csv_path: str, techs: list) -> pd.DataFrame:
     """Create a file with maximum installed technology capacities using initial capacities."""
-    input_df = pd.read_csv(input_path)
-    frozen_cap_df = pd.DataFrame(columns=CALLIOPE_COLS)
+    cap_df = pd.read_csv(ini_cap_csv_path)
 
-    for tech in frozen_techs:
-        tech_df = input_df[(input_df["techs"] == tech) & (input_df["parameters"].isin(FREEZE_CONVERT))].copy()
-        if not tech_df.empty:
-            tech_df["parameters"] = tech_df["parameters"].replace(FREEZE_CONVERT)
-            frozen_cap_df = pd.concat([frozen_cap_df, tech_df])
-    frozen_cap_df.to_csv(csv_out_path, index=False)
+    # assert __test_group_completion(cap_df["parameters"], PARAM_INI_TO_MAX), "Missing parameters in group"
+
+    cap_df = cap_df[(cap_df["techs"].isin(techs)) & (cap_df["parameters"].isin(PARAM_INI_TO_MAX))]
+    cap_df["parameters"] = cap_df["parameters"].replace(PARAM_INI_TO_MAX)
+
+    # for t in techs:
+    #     tech_df = ini_cap_df[(ini_cap_df["techs"] == t) & (ini_cap_df["parameters"].isin(PARAM_INI_TO_MAX))].copy()
+    #     if not tech_df.empty:
+    #         tech_df["parameters"] = tech_df["parameters"].replace(PARAM_INI_TO_MAX)
+    #         cap_max_df = pd.concat([cap_max_df, tech_df])
+
+    return cap_df
 
 
-def get_techs_per_node(input_yaml_path: str) -> dict:
-    """Get a dictionary specifying the technologies installed in a given region.
+def parse_cap_remaining(tech_yml_path: str, ini_cap_csv_path: str, years: list) -> pd.DataFrame:
+    """Applies a Weibull function to the initial capacity to decrease it realistically.
 
     Args:
-        input_path (str): path to Lombardi's location.yaml
-
-    Returns:
-        dict: containing {node: [techs]}
+        tech_yml_path (str): yaml file with technology data
+        node_tech_path (str): specifying installed technology per region
+        years (list): range of years modelled
+        shape_factor (int, optional): Weibull . Defaults to 0.5.
     """
-    yaml_df = _build_location_df(input_yaml_path)
-    tech_df = yaml_df[yaml_df["node attribute"] == "techs"]
+    # technology lifetime
+    tech_df = _build_tech_df(tech_yml_path)
+    tech_life_df = tech_df[tech_df["parameters"].isin(["lifetime"])].set_index("techs")
 
-    replace_dict = {v: k for k, values in TECH_GROUPS.items() for v in values}
-    tech_df["item"] = tech_df["item"].replace(replace_dict)
+    # fetch available technologies per region
+    ini_cap_df = pd.read_csv(ini_cap_csv_path)
+    remaining_df = ini_cap_df[["nodes", "techs"]].copy()
 
-    return {n: tech_df[tech_df["node"].isin(n_group)]["item"].unique() for n, n_group in NODE_GROUPS.items()}
+    # Construct random phase-out sequence
+    random.seed(SEED, version=2)
+    shape_factors = [random.uniform(BETA_MIN, BETA_MAX) for _ in remaining_df.index]
+    life_factors = [random.uniform(AGE_FACTOR_MIN, AGE_FACTOR_MAX) for _ in remaining_df.index]
+
+    # Get phase-out sequence using a Weibull function
+    remaining_df[years] = 0.0
+
+    for i in remaining_df.index:
+        tech = remaining_df.loc[i, "techs"]
+        avg_remaining_life = tech_life_df.loc[tech, "value"] * life_factors[i]
+        remaining_df.loc[i, years[0]:] = [_weibull(y-years[0], avg_remaining_life, shape_factors[i]) for y in years]
+
+    return remaining_df
+
+
+def main(test_figs=False):
+    loc_lombardi_yml = "src/calliope_pathways/models/italy_stationary/pre_processing/locations_lombardi.yaml"
+    tech_stationary_yml = "src/calliope_pathways/models/italy_stationary/model_config/techs.yaml"
+
+    ini_cap = parse_initial_cap(loc_lombardi_yml)
+    ini_cap_path = "src/calliope_pathways/models/italy_stationary/data_sources/inital_capacity_techs_kw.csv"
+    ini_cap.to_csv(ini_cap_path, index=False)
+
+    cap_max_df = parse_cap_max(ini_cap_path, ["geothermal", "battery_phs", "hydropower", "waste"])
+    frozen_path = "src/calliope_pathways/models/italy_stationary/data_sources/max_capacity_techs_kw.csv"
+    cap_max_df.to_csv(frozen_path, index=False)
+
+    years = np.arange(2020,2060,10)
+    avail_ini_cap_df = parse_cap_remaining(tech_stationary_yml, ini_cap_path,years)
+    avail_ini_path = "src/calliope_pathways/models/italy_stationary/data_sources/investstep_series/available_initial_cap.csv"
+    avail_ini_cap_df.to_csv(avail_ini_path, index=False)
+
+    if test_figs:
+        avail_ini_cap_df.loc[:, 2020:].T.plot()
+        plt.savefig("test.png")
+
 
 
 if __name__ == "__main__":
-    input_path = "src/calliope_pathways/models/italy_stationary/pre_processing/locations_lombardi.yaml"
-    initial_cap_path = "src/calliope_pathways/models/italy_stationary/data_sources/inital_capacity_techs_kw.csv"
-    parse_initial_cap(input_path, initial_cap_path)
-
-    frozen_path = "src/calliope_pathways/models/italy_stationary/data_sources/max_capacity_techs_kw.csv"
-    frozen_techs = ["geothermal", "battery_phs", "hydropower", "waste"]
-    parse_cap_max(initial_cap_path, frozen_path, frozen_techs)
-    print(get_techs_per_node(input_path))
-
+    main()
