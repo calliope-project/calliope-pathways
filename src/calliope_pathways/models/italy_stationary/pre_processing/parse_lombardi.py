@@ -89,29 +89,22 @@ def _build_tech_df(yml_path: str, calliope_version: str="0.7") -> pd.DataFrame:
     return yaml_df
 
 def _weibull(year: int, lifetime: float, shape: float, year_shift: int=0) -> float:
-    """A Weibull probability distribution, see 10.1186/s12544-020-00464-0."""
+    """A Weibull probability distribution, see 10.1186/s12544-020-00464-0.
+
+    Args:
+        year (int): year in technology's lifetime, starting at 0.
+        lifetime (float): average lifetime of a technology.
+        shape (float): shape factor (Beta). <1 infant mortality, 1 random, >1 intrinsic wear-out.
+        year_shift (int, optional): x-axis shift. Defaults to 0.
+
+    Returns:
+        float: share of surviving capacity at given year.
+    """
     return np.exp(-(((year+year_shift)/lifetime)**shape) * gamma(1+1/shape)**shape)
 
 def __test_group_completion(col: pd.Series, group_dict: dict) -> bool:
     """Check if a group dictionary covers all the possible values of a column."""
     return sorted(col.unique()) == sorted([i for j in group_dict.values() for i in j])
-
-# def get_techs_per_node(input_yaml_path: str) -> dict:
-#     """Get a dictionary specifying the technologies installed in a given region.
-
-#     Args:
-#         input_path (str): path to Lombardi's location.yaml
-
-#     Returns:
-#         dict: containing {node: [techs]}
-#     """
-#     loc_yaml_df = _location_yaml_to_df(input_yaml_path)
-#     loc_tech_df = loc_yaml_df[loc_yaml_df["node attributes"] == "techs"]
-
-#     replace_dict = {v: k for k, values in TECH_GROUPING.items() for v in values}
-#     loc_tech_df["items"] = loc_tech_df["items"].replace(replace_dict)
-
-#     return {n: loc_tech_df[loc_tech_df["nodes"].isin(n_group)]["items"].unique() for n, n_group in NODE_GROUPING.items()}
 
 def parse_initial_cap(loc_yml_path: str, calliope_version="0.6.8") -> pd.DataFrame:
     """Extract initial installed capacity (2015 values)."""
@@ -148,17 +141,8 @@ def parse_initial_cap(loc_yml_path: str, calliope_version="0.6.8") -> pd.DataFra
 def parse_cap_max(ini_cap_csv_path: str, techs: list) -> pd.DataFrame:
     """Create a file with maximum installed technology capacities using initial capacities."""
     cap_df = pd.read_csv(ini_cap_csv_path)
-
-    # assert __test_group_completion(cap_df["parameters"], PARAM_INI_TO_MAX), "Missing parameters in group"
-
     cap_df = cap_df[(cap_df["techs"].isin(techs)) & (cap_df["parameters"].isin(PARAM_INI_TO_MAX))]
     cap_df["parameters"] = cap_df["parameters"].replace(PARAM_INI_TO_MAX)
-
-    # for t in techs:
-    #     tech_df = ini_cap_df[(ini_cap_df["techs"] == t) & (ini_cap_df["parameters"].isin(PARAM_INI_TO_MAX))].copy()
-    #     if not tech_df.empty:
-    #         tech_df["parameters"] = tech_df["parameters"].replace(PARAM_INI_TO_MAX)
-    #         cap_max_df = pd.concat([cap_max_df, tech_df])
 
     return cap_df
 
