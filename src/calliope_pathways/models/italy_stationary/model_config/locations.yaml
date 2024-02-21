@@ -14,26 +14,86 @@ nodes:
     longitude: 20.610642
   # Italy regions
   NORD:
-    techs: {ccgt, hydropower, demand_power, wind, pv, battery_phs, waste, bioenergy, battery_li}
+    techs:
+      ccgt:
+      hydropower:
+      demand_power:
+      wind:
+      pv:
+      battery_phs:
+      waste:
+      bioenergy:
+      battery_li:
     latitude: 45.219847
     longitude: 9.624722
   CNOR:
-    techs: {ccgt, hydropower, demand_power, wind, pv, oil, geothermal, waste, bioenergy, coal, battery_li}
+    techs:
+      ccgt:
+      hydropower:
+      demand_power:
+      wind:
+      pv:
+      oil:
+      geothermal:
+      waste:
+      bioenergy:
+      coal:
+      battery_li:
     latitude: 43.460750
     longitude: 11.861967
   CSUD:
-    techs: {ccgt, hydropower, demand_power, wind, pv, coal, waste, bioenergy, battery_phs, battery_li}
+    techs:
+      ccgt:
+      hydropower:
+      demand_power:
+      wind:
+      pv:
+      coal:
+      waste:
+      bioenergy:
+      battery_phs:
+      battery_li:
     latitude: 41.634090
     longitude: 13.335471
   SUD:
-    techs: {ccgt, hydropower, demand_power, wind, pv, waste, bioenergy, coal, oil, battery_li}
+    techs:
+      ccgt:
+      hydropower:
+      demand_power:
+      wind:
+      pv:
+      waste:
+      bioenergy:
+      coal:
+      oil:
+      battery_li:
     latitude: 40.678274
     longitude: 16.597098
   SICI:
-    techs: {ccgt, hydropower, demand_power, wind, pv, oil, battery_phs, bioenergy, battery_li}
+    techs:
+      ccgt:
+      hydropower:
+      demand_power:
+      wind:
+      pv:
+      oil:
+      battery_phs:
+      bioenergy:
+      battery_li:
     latitude: 37.511642
     longitude: 15.085379
   SARD:
-    techs: {ccgt, hydropower, demand_power, wind, pv, coal, oil, battery_phs, waste, bioenergy, battery_li}
+    techs:
+      ccgt:
+      hydropower:
+      demand_power:
+      wind:
+      pv:
+      coal:
+      oil:
+      battery_phs:
+      waste:
+      bioenergy:
+      battery_li:
     latitude: 40.302551
     longitude: 9.319396
