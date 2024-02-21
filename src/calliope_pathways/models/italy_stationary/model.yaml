@@ -51,7 +51,8 @@ data_sources:
     rows: [nodes, techs, parameters]
   initial_transmission_capacity_params:
     source: data_sources/initial_capacity_transmission_kw.csv
-    rows: [techs, parameters]
+    rows: [comment, techs, parameters]
+    drop: comment
   maximum_capacity_params:
     source: data_sources/max_capacity_techs_kw.csv
     rows: [nodes, techs, parameters]
