@@ -265,7 +265,7 @@ variables:
     foreach: [nodes, techs, vintagesteps]
     bounds:
       min: 0
-      max: storage_cap_max
+      max: storage_cap_new_max
 
   source_cap_new:
     description: >-
@@ -275,7 +275,7 @@ variables:
     foreach: [nodes, techs, vintagesteps]
     bounds:
       min: 0
-      max: source_cap_max
+      max: source_cap_new_max
 
   area_use_new:
     description: >-
@@ -285,7 +285,7 @@ variables:
     foreach: [nodes, techs, vintagesteps]
     bounds:
       min: 0
-      max: area_use_max
+      max: area_use_new_max
 
 global_expressions:
   flow_out_inc_eff:
