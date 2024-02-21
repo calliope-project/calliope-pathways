@@ -5,11 +5,15 @@
 nodes:
   # Import/export regions
   EUC:
-    techs: {import_power, export_power}
+    techs:
+      import_power:
+      export_power:
     latitude: 46.382945
     longitude: 8.756699
   GRE:
-    techs: {import_power, export_power}
+    techs:
+      import_power:
+      export_power:
     latitude: 39.430745
     longitude: 20.610642
   # Italy regions
