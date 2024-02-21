@@ -1,6 +1,6 @@
 comment,taken from Lombardi’s model,taken from Lombardi’s model,taken from Lombardi’s model,taken from Lombardi’s model,taken from Lombardi’s model,taken from Lombardi’s model
 nodes,NORD,CNOR,CSUD,SUD,SICI,SARD
-techs,hydropower,hydropower,hydropower,hydropower,hydropower,hydro
+techs,hydropower,hydropower,hydropower,hydropower,hydropower,hydropower
 parameters,source_use_equals,source_use_equals,source_use_equals,source_use_equals,source_use_equals,source_use_equals
 timesteps,,,,,,
 2015-01-01 00:00:00,0.542,0.542,0.542,0.542,0.542,0.542
