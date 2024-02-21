@@ -47,7 +47,7 @@ parameters:
 data_sources:
   # Initial installed capacity
   initial_tech_capacity_params:
-    source: data_sources/inital_capacity_techs_kw.csv
+    source: data_sources/initial_capacity_techs_kw.csv
     rows: [nodes, techs, parameters]
   initial_transmission_capacity_params:
     source: data_sources/initial_capacity_transmission_kw.csv

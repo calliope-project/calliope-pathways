@@ -63,7 +63,7 @@ def _location_yaml_to_df(path: str, calliope_version: str = "0.6.8") -> pd.DataF
     if calliope_version == "0.6.8":
         yaml_df = pd.json_normalize(yaml_data["locations"])
         yaml_df = yaml_df.T.reset_index()
-        yaml_df.columns = ["commands", "value"]
+        yaml_df.columns = ["commands", "values"]
 
         # Arrange commands into something sensible
         command_split = [
@@ -88,7 +88,7 @@ def _build_tech_df(yml_path: str, calliope_version: str = "0.7") -> pd.DataFrame
     if calliope_version == "0.7":
         yaml_df = pd.json_normalize(yaml_data["techs"])
         yaml_df = yaml_df.T.reset_index()
-        yaml_df.columns = ["commands", "value"]
+        yaml_df.columns = ["commands", "values"]
 
         # Arrange commands into something sensible
         command_split = ["techs", "parameters"]
@@ -135,7 +135,7 @@ def parse_initial_cap(loc_yml_path: str, calliope_version="0.6.8") -> pd.DataFra
 
     # Run tests
     assert (
-        pd.to_numeric(loc_tech_df["value"], errors="coerce").notnull().all()
+        pd.to_numeric(loc_tech_df["values"], errors="coerce").notnull().all()
     ), "Invalid numeric values"
     assert __test_group_completion(
         loc_tech_df["nodes"], NODE_GROUPING
@@ -158,7 +158,7 @@ def parse_initial_cap(loc_yml_path: str, calliope_version="0.6.8") -> pd.DataFra
                 param_df = tech_df[tech_df["parameters"].isin(p_group)]
                 if not param_df.empty:
                     aggregated_data = pd.Series(
-                        data=[n, t, p, param_df["value"].sum()], index=BASIC_V07_COLS
+                        data=[n, t, p, param_df["values"].sum()], index=BASIC_V07_COLS
                     )
                     ini_cap_df.loc[len(ini_cap_df.index)] = aggregated_data
 
@@ -187,7 +187,7 @@ def parse_available_initial_cap(
         years (list): range of years modelled
         shape_factor (int, optional): Weibull . Defaults to 0.5.
     """
-    # technology lifetime
+    # get technology lifetimes
     tech_df = _build_tech_df(tech_yml_path)
     tech_life_df = tech_df[tech_df["parameters"].isin(["lifetime"])].set_index("techs")
 
@@ -201,13 +201,12 @@ def parse_available_initial_cap(
     life_factors = [
         random.uniform(AGE_FACTOR_MIN, AGE_FACTOR_MAX) for _ in remaining_df.index
     ]
-    print("life factors",life_factors)
     # Get phase-out sequence using a Weibull function
     remaining_df[years] = 0.0
 
     for i in remaining_df.index:
         tech = remaining_df.loc[i, "techs"]
-        avg_remaining_life = tech_life_df.loc[tech, "value"] * life_factors[i]
+        avg_remaining_life = tech_life_df.loc[tech, "values"] * life_factors[i]
         remaining_df.loc[i, years[0] :] = [
             _weibull(y - years[0], avg_remaining_life, shape_factors[i]) for y in years
         ]
@@ -228,7 +227,7 @@ def parse_available_vintages(tech_yml_path: str, years: list, option: str = "cut
         case "cut":  # binary elimination of capacity
             for t in vintages_df.index:
                 for (v, y) in vintages_df.columns:
-                    if tech_life_df.loc[t, "value"] > (v-y):
+                    if tech_life_df.loc[t, "values"] > (v-y):
                         vintages_df.loc[t, (v,y)] = 1
                     else:
                         vintages_df.loc[t, (v,y)] = 0
@@ -236,7 +235,7 @@ def parse_available_vintages(tech_yml_path: str, years: list, option: str = "cut
             # TODO: only works for constant spacing between investsteps, for now.
             for t in vintages_df.index:
                 for (v, y) in vintages_df.columns:
-                    lifetime = tech_life_df.loc[t, "value"]
+                    lifetime = tech_life_df.loc[t, "values"]
                     if lifetime > (v-y):
                         vintages_df.loc[t, (v,y)] = 1
                     elif lifetime > (v-y) - YEAR_STEP:
@@ -258,7 +257,7 @@ def main(test_figs=True):
     )
 
     ini_cap = parse_initial_cap(loc_lombardi_yml)
-    ini_cap_path = "src/calliope_pathways/models/italy_stationary/data_sources/inital_capacity_techs_kw.csv"
+    ini_cap_path = "src/calliope_pathways/models/italy_stationary/data_sources/initial_capacity_techs_kw.csv"
     ini_cap.to_csv(ini_cap_path, index=False)
 
     cap_max_df = parse_cap_max(
@@ -270,11 +269,11 @@ def main(test_figs=True):
     avail_ini_cap_df = parse_available_initial_cap(
         tech_stationary_yml, ini_cap_path, YEARS
     )
-    avail_ini_path = "src/calliope_pathways/models/italy_stationary/data_sources/investstep_series/available_initial_cap.csv"
+    avail_ini_path = "src/calliope_pathways/models/italy_stationary/data_sources/investstep_series/available_initial_cap_techs.csv"
     avail_ini_cap_df.to_csv(avail_ini_path, index=False)
 
     avail_vint_df = parse_available_vintages(tech_stationary_yml, YEARS, option="share")
-    avail_vint_path = "src/calliope_pathways/models/italy_stationary/data_sources/investstep_series/available_vintages.csv"
+    avail_vint_path = "src/calliope_pathways/models/italy_stationary/data_sources/investstep_series/available_vintages_techs.csv"
     avail_vint_df.to_csv(avail_vint_path)
 
     if test_figs:
