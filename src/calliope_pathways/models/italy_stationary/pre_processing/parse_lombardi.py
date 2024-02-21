@@ -195,7 +195,6 @@ def parse_available_initial_cap(
     ini_cap_df = pd.read_csv(ini_cap_csv_path)
     remaining_df = ini_cap_df[["nodes", "techs"]].copy()
     remaining_df = remaining_df.drop_duplicates(ignore_index=True)
-    print(remaining_df.drop_duplicates())
     # Construct random phase-out sequence
     random.seed(SEED, version=2)
     shape_factors = [random.uniform(BETA_MIN, BETA_MAX) for _ in remaining_df.index]
@@ -247,7 +246,7 @@ def parse_available_vintages(tech_yml_path: str, years: list, option: str = "cut
             raise ValueError("This option has not been implemented yet.")
         case _:
             raise ValueError("Invalid option specified.")
-
+    vintages_df.index.name = None
     return vintages_df
 
 
