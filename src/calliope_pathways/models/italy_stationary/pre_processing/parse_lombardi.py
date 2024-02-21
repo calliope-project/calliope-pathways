@@ -11,7 +11,7 @@ YEAR_STEP = 10
 YEARS = np.arange(2020, 2050+YEAR_STEP, YEAR_STEP)
 
 # Weibull settings
-SEED = 7000
+SEED = 5555
 BETA_MIN = 3
 BETA_MAX = 8
 AGE_FACTOR_MIN = 0.1
@@ -194,7 +194,8 @@ def parse_available_initial_cap(
     # fetch available technologies per region
     ini_cap_df = pd.read_csv(ini_cap_csv_path)
     remaining_df = ini_cap_df[["nodes", "techs"]].copy()
-
+    remaining_df = remaining_df.drop_duplicates(ignore_index=True)
+    print(remaining_df.drop_duplicates())
     # Construct random phase-out sequence
     random.seed(SEED, version=2)
     shape_factors = [random.uniform(BETA_MIN, BETA_MAX) for _ in remaining_df.index]

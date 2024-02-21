@@ -45,7 +45,7 @@ parameters:
     dims: investsteps
 
 data_sources:
-  # Initial installed capacity
+  # Initial setup
   initial_tech_capacity_params:
     source: data_sources/initial_capacity_techs_kw.csv
     rows: [nodes, techs, parameters]
@@ -55,6 +55,35 @@ data_sources:
   maximum_capacity_params:
     source: data_sources/max_capacity_techs_kw.csv
     rows: [nodes, techs, parameters]
+
+  # Pathway setup
+  available_initial_cap_techs:
+    source: data_sources/investstep_series/available_initial_cap_techs.csv
+    rows: [nodes, techs]
+    columns: investsteps
+    add_dimensions:
+      parameters: available_initial_cap
+
+  available_initial_cap_transmission:
+    source: data_sources/investstep_series/available_initial_cap_transmission.csv
+    rows: [techs]
+    columns: investsteps
+    add_dimensions:
+      parameters: available_initial_cap
+
+  vintage_availability_techs:
+    source: data_sources/investstep_series/available_vintages_techs.csv
+    rows: techs
+    columns: [vintagesteps, investsteps]
+    add_dimensions:
+      parameters: available_vintages
+
+  vintage_availability_transmission:
+    source: data_sources/investstep_series/available_vintages_transmission.csv
+    rows: techs
+    columns: [vintagesteps, investsteps]
+    add_dimensions:
+      parameters: available_vintages
 
   # VRE generation data
   # Opposite to Lombardi's study, we force Hydro inflow use, and allow renewable curtailment
