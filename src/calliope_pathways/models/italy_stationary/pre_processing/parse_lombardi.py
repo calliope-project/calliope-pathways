@@ -246,6 +246,9 @@ def parse_available_vintages(tech_yml_path: str, years: list, option: str = "cut
             raise ValueError("This option has not been implemented yet.")
         case _:
             raise ValueError("Invalid option specified.")
+
+    # TODO: bug workarounds
+    vintages_df.loc["demand_power"] = 1
     vintages_df.index.name = None
     return vintages_df
 
