@@ -100,17 +100,10 @@ model.inputs.available_initial_cap.to_series().dropna()
 # Recently commercialised technologies may see their deployment costs decrease substantially in the first decade or two of mass deployment.
 # Even established technologies can reduce in cost over time as the manufacturing facilities and logistical pipelines are constantly optimised.
 
-# %%
-model.inputs.cost_flow_cap.to_series().dropna()
-
-# %%
-model.inputs.cost_storage_cap.to_series().dropna()
-
 # %% [markdown]
 # End-of-life decommissioning is tracked with a matrix similar to [initial capacities](#initial-capacity).
 # Fractional availability accounts for technologies whose lifetimes fall in-between two investment steps.
 
-# %%
 # Note how vintages are never available in investsteps that are in their _future_.
 model.inputs.available_vintages.to_series().dropna().unstack("investsteps")
 

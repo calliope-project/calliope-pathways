@@ -56,7 +56,11 @@ tech_groups:
       index: monetary
       dims: costs
     cost_flow_out:
-      data: 0.0022  # EUR2010/kWh, from Lombardi
+      data: 0.0011  # EUR2010/kWh, from Lombardi
+      index: monetary
+      dims: costs
+    cost_flow_cap:
+      data: 450   # EUR2010/kW, from Lombardi
       index: monetary
       dims: costs
 
@@ -273,10 +277,13 @@ techs: # Color scheme is Tol Qual Muted + some extras
     inherit: inter_zonal_transmission
     from: CNOR
     to: SARD
+    cost_flow_cap.data: 1660 # EUR2010/kW, from Lombardi (subsea)
   ac_CSUD_to_SARD:
     inherit: inter_zonal_transmission
     from: CSUD
     to: SARD
+    cost_flow_cap.data: 750 # EUR2010/kW, from Lombardi (subsea)
+    cost_flow_out.data: 0.0022  # EUR2010/kWh, from Lombardi
   ac_CSUD_SUD:
     inherit: inter_zonal_transmission
     from: CSUD
@@ -285,6 +292,8 @@ techs: # Color scheme is Tol Qual Muted + some extras
     inherit: inter_zonal_transmission
     from: SUD
     to: SICI
+    cost_flow_cap.data: 636 # EUR2010/kW, from Lombardi (subsea)
+    cost_flow_out.data: 0.0022  # EUR2010/kWh, from Lombardi
   # Outside Italy
   ac_NORD_to_EUC:
     inherit: inter_zonal_transmission
