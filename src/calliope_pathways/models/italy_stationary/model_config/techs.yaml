@@ -217,7 +217,7 @@ techs: # Color scheme is Tol Qual Muted + some extras
     flow_in_eff: 0.98
     lifetime: 15
 
-    initial_flow_cap: 0
+    flow_cap_initial: 0
 
     # Lombardi
     cost_storage_cap.data: 433 # EUR2010/kWh storage capacity

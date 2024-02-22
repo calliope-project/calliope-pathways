@@ -43,13 +43,13 @@ TECH_GROUPING = {
 }
 
 PARAM_V068_TO_V07 = {
-    "initial_flow_cap": ["energy_cap_equals", "energy_cap_max"],
-    "initial_storage_cap": ["storage_cap_equals"],
+    "flow_cap_initial": ["energy_cap_equals", "energy_cap_max"],
+    "storage_cap_initial": ["storage_cap_equals"],
 }
 
 PARAM_INI_TO_MAX = {
-    "initial_flow_cap": "flow_cap_max",
-    "initial_storage_cap": "storage_cap_max",
+    "flow_cap_initial": "flow_cap_max",
+    "storage_cap_initial": "storage_cap_max",
 }
 
 BASIC_V07_COLS = ["nodes", "techs", "parameters", "values"]
