@@ -30,6 +30,7 @@ config:
       BarIterLimit: 3000
       OptimalityTol: 1e-4
       FeasibilityTol: 1e-4
+      DualReductions: 0
 
 
 parameters:
@@ -49,6 +50,8 @@ data_sources:
   initial_tech_capacity_params:
     source: data_sources/initial_capacity_techs_kw.csv
     rows: [nodes, techs, parameters]
+    columns: [values]
+    drop: values
   initial_transmission_capacity_params:
     source: data_sources/initial_capacity_transmission_kw.csv
     rows: [comment, techs, parameters]
@@ -56,6 +59,8 @@ data_sources:
   maximum_capacity_params:
     source: data_sources/max_capacity_techs_kw.csv
     rows: [nodes, techs, parameters]
+    columns: [values]
+    drop: values
 
   # Pathway setup
   available_initial_cap_techs:

@@ -1,3 +1,4 @@
+nodes,techs,parameters,values
 NORD,hydropower,flow_cap_max,11191600
 NORD,battery_phs,flow_cap_max,5064300
 NORD,battery_phs,storage_cap_max,469050200

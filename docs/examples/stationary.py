@@ -25,6 +25,8 @@ import calliope
 import calliope_pathways
 import plotly.express as px
 
+OUTPUT_PATH = "outputs/"
+
 calliope.set_log_verbosity("INFO", include_solver_output=False)
 
 # %% [markdown]
@@ -73,10 +75,6 @@ model.inputs.vintagesteps
 # %%
 # Decreasing costs of investing in technologies
 model.inputs.cost_flow_cap.to_series().dropna()
-
-# %%
-# Forced phase-out of combined-cycle gas turbines
-model.inputs.flow_cap_max_systemwide.to_series().dropna()
 
 # %% [markdown]
 # ### Initial capacity
@@ -144,7 +142,7 @@ model.inputs.flow_cap_max.to_series().dropna()
 
 # %%
 model.build()
-
+model.backend.to_lp(OUTPUT_PATH+"test.lp")
 # %% [markdown]
 # ## Analyse results
 
