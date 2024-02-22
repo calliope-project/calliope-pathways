@@ -84,7 +84,7 @@ model.inputs.flow_cap_max_systemwide.to_series().dropna()
 # Unlike greenfield optimisation ("plan" mode in Calliope), pathway optimisation should be initialised with a certain amount of existing technology capacity:
 
 # %%
-model.inputs.initial_flow_cap.to_series().dropna()
+model.inputs.flow_cap_initial.to_series().dropna()
 
 # %% [markdown]
 # This technology capacity can then be phased out as we step through to the end of our time horizon:
