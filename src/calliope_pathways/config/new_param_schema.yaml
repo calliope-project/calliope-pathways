@@ -1,4 +1,39 @@
 techs:
+  flow_cap_new_max:
+    $ref: "#/$defs/TechParamNullNumber"
+    default: .inf
+    x-type: float
+    title: Maximum new flow capacity.
+    description: >-
+      Maximum amount of flow capacity of a specific technology vintage.
+    x-unit: power.
+
+  storage_cap_new_max:
+    $ref: "#/$defs/TechParamNullNumber"
+    default: .inf
+    x-type: float
+    title: Maximum new storage capacity.
+    description: >-
+      Maximum amount of storage capacity of a specific technology vintage.
+    x-unit: energy.
+
+  source_cap_new_max:
+    $ref: "#/$defs/TechParamNullNumber"
+    default: .inf
+    x-type: float
+    title: Maximum new source capacity.
+    description: >-
+      Maximum amount of source capacity of a specific technology vintage.
+    x-unit: power.
+
+  area_use_new_max:
+    $ref: "#/$defs/TechParamNullNumber"
+    default: .inf
+    x-type: float
+    title: Maximum new area use.
+    description: >-
+      Maximum amount of area use of a specific technology vintage.
+    x-unit: area.
 
   available_initial_cap:
     $ref: "#/$defs/TechParamNullNumber"
