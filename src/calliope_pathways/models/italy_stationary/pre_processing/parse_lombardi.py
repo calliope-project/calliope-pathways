@@ -19,7 +19,7 @@ BETA_MAX = 8
 AGE_FACTOR_MIN = 0.1
 AGE_FACTOR_MAX = 0.8
 # Technologies with no growth
-FROZEN_TECHS = ["geothermal", "battery_phs", "hydropower", "waste"]
+FROZEN_TECHS = ["geothermal", "battery_phs", "hydropower", "waste", "ccgt", "coal", "oil"]
 # << Model setup <<
 
 # >> Parsing setup >> DO NOT MODIFY!
@@ -115,7 +115,7 @@ def _build_tech_df(yml_path: str, calliope_version: str = "0.7") -> pd.DataFrame
     return yaml_df
 
 
-def _weibull(year: int, lifetime: float, shape: float, year_shift: int = 0) -> float:
+def _weibull(year: int, lifetime: float, shape: float, year_shift: int = 0, zero_min: float=1e-3) -> float:
     """A Weibull probability distribution, see 10.1186/s12544-020-00464-0.
 
     Args:
@@ -123,13 +123,15 @@ def _weibull(year: int, lifetime: float, shape: float, year_shift: int = 0) -> f
         lifetime (float): average lifetime of a technology.
         shape (float): shape factor (Beta). <1 infant mortality, 1 random, >1 intrinsic wear-out.
         year_shift (int, optional): x-axis shift. Defaults to 0.
+        zero_min (float, optional): minimum value allowed before defaulting to zero. Defaults to 1-e3.
 
     Returns:
         float: share of surviving capacity at given year.
     """
-    return np.exp(
-        -(((year + year_shift) / lifetime) ** shape) * gamma(1 + 1 / shape) ** shape
-    )
+    wb = np.exp(-(((year + year_shift) / lifetime) ** shape) * gamma(1 + 1 / shape) ** shape)
+    if wb < zero_min:
+        wb = 0
+    return wb
 
 
 def __test_group_completion(col: pd.Series, group_dict: dict) -> bool:
