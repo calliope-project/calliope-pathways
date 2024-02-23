@@ -4,31 +4,41 @@ import random
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import requests
 from scipy.special import gamma
 from yaml import safe_load
 
+# >> Model setup >> User configurable
+# Years
 YEAR_STEP = 10
 YEARS = np.arange(2020, 2050+YEAR_STEP, YEAR_STEP)
-
-# Weibull settings
+# Decommissioning (Randomized Weibull)
 SEED = 5555
 BETA_MIN = 3
 BETA_MAX = 8
 AGE_FACTOR_MIN = 0.1
 AGE_FACTOR_MAX = 0.8
+# Technologies with no growth
+FROZEN_TECHS = ["geothermal", "battery_phs", "hydropower", "waste"]
+# << Model setup <<
 
-# Conversion parameters
-NODE_GROUPING = {
-    "NORD": [f"R{i}" for i in range(1, 9)],
-    "CNOR": [f"R{i}" for i in range(9, 12)],
-    "CSUD": [f"R{i}" for i in range(12, 15)],
-    "SUD": [f"R{i}" for i in range(15, 19)],
-    "SICI": [],
-    "SARD": [],
+# >> Parsing setup >> DO NOT MODIFY!
+BASIC_V07_COLS = ["nodes", "techs", "parameters", "values"]
+INPUT_FILES = {
+    "Calliope-Italy": {
+        "locations": "https://raw.githubusercontent.com/FLomb/Calliope-Italy/master/italy_20_regions_v.0.2/Model/model_config/locations.yaml"
+    },
+    "stationary": {
+        "techs": "src/calliope_pathways/models/italy_stationary/model_config/techs.yaml"
+    }
 }
-
-NODE_GROUPING = {k: [k] + i for k, i in NODE_GROUPING.items()}
-
+OUTPUT_FILES = {
+    "cap_initial": "src/calliope_pathways/models/italy_stationary/data_sources/initial_capacity_techs_kw.csv",
+    "cap_max": "src/calliope_pathways/models/italy_stationary/data_sources/max_capacity_techs_kw.csv",
+    "available_initial_cap": "src/calliope_pathways/models/italy_stationary/data_sources/investstep_series/available_initial_cap_techs.csv",
+    "available_vintage_cap": "src/calliope_pathways/models/italy_stationary/data_sources/investstep_series/available_vintages_techs.csv"
+}
+# Technology aggregation
 TECH_GROUPING = {
     "ccgt": ["ccgt"],
     "hydropower": ["hydro_dam", "hydro_ror"],
@@ -41,25 +51,30 @@ TECH_GROUPING = {
     "geothermal": ["geothermal"],
     "coal": ["coal", "coal_usc"],
 }
-
+# Spatial aggregation
+NODE_GROUPING = {
+    "NORD": [f"R{i}" for i in range(1, 9)],
+    "CNOR": [f"R{i}" for i in range(9, 12)],
+    "CSUD": [f"R{i}" for i in range(12, 15)],
+    "SUD": [f"R{i}" for i in range(15, 19)],
+    "SICI": [],
+    "SARD": [],
+}
+NODE_GROUPING = {k: [k] + i for k, i in NODE_GROUPING.items()}
+# Parameter conversion
 PARAM_V068_TO_V07 = {
     "flow_cap_initial": ["energy_cap_equals", "energy_cap_max"],
     "storage_cap_initial": ["storage_cap_equals"],
 }
-
-PARAM_INI_TO_MAX = {
+PARAM_INI_TO_MAX = { # TODO: this should be converted from Lombardi's file instead
     "flow_cap_initial": "flow_cap_max",
     "storage_cap_initial": "storage_cap_max",
 }
+# << Parsing setup <<
 
-BASIC_V07_COLS = ["nodes", "techs", "parameters", "values"]
-
-
-def _location_yaml_to_df(path: str, calliope_version: str = "0.6.8") -> pd.DataFrame:
+def _location_yaml_to_df(yaml_data: dict, calliope_version: str = "0.6.8") -> pd.DataFrame:
     """Converts a location yaml into a searchable dataframe."""
     # Read yaml file
-    with open(path, "r") as file:
-        yaml_data = safe_load(file)
     if calliope_version == "0.6.8":
         yaml_df = pd.json_normalize(yaml_data["locations"])
         yaml_df = yaml_df.T.reset_index()
@@ -124,7 +139,8 @@ def __test_group_completion(col: pd.Series, group_dict: dict) -> bool:
 
 def parse_initial_cap(loc_yml_path: str, calliope_version="0.6.8") -> pd.DataFrame:
     """Extract initial installed capacity (2015 values)."""
-    loc_yaml_df = _location_yaml_to_df(loc_yml_path, calliope_version)
+    loc_yml_data = safe_load(requests.get(loc_yml_path).text)
+    loc_yaml_df = _location_yaml_to_df(loc_yml_data, calliope_version)
 
     # Find exclusively numeric teach params in each location
     loc_tech_df = loc_yaml_df[
@@ -254,30 +270,20 @@ def parse_available_vintages(tech_yml_path: str, years: list, option: str = "cut
 
 
 def main(test_figs=True):
-    loc_lombardi_yml = "src/calliope_pathways/models/italy_stationary/pre_processing/locations_lombardi.yaml"
-    tech_stationary_yml = (
-        "src/calliope_pathways/models/italy_stationary/model_config/techs.yaml"
-    )
 
-    ini_cap = parse_initial_cap(loc_lombardi_yml)
-    ini_cap_path = "src/calliope_pathways/models/italy_stationary/data_sources/initial_capacity_techs_kw.csv"
-    ini_cap.to_csv(ini_cap_path, index=False)
+    ini_cap = parse_initial_cap(INPUT_FILES["Calliope-Italy"]["locations"])
+    ini_cap.to_csv(OUTPUT_FILES["cap_initial"], index=False)
 
-    cap_max_df = parse_cap_max(
-        ini_cap_path, ["geothermal", "battery_phs", "hydropower", "waste"]
-    )
-    frozen_path = "src/calliope_pathways/models/italy_stationary/data_sources/max_capacity_techs_kw.csv"
-    cap_max_df.to_csv(frozen_path, index=False)
+    cap_max_df = parse_cap_max(OUTPUT_FILES["cap_initial"], FROZEN_TECHS)
+    cap_max_df.to_csv(OUTPUT_FILES["cap_max"], index=False)
 
     avail_ini_cap_df = parse_available_initial_cap(
-        tech_stationary_yml, ini_cap_path, YEARS
+        INPUT_FILES["stationary"]["techs"], OUTPUT_FILES["cap_initial"], YEARS
     )
-    avail_ini_path = "src/calliope_pathways/models/italy_stationary/data_sources/investstep_series/available_initial_cap_techs.csv"
-    avail_ini_cap_df.to_csv(avail_ini_path, index=False)
+    avail_ini_cap_df.to_csv(OUTPUT_FILES["available_initial_cap"], index=False)
 
-    avail_vint_df = parse_available_vintages(tech_stationary_yml, YEARS, option="share")
-    avail_vint_path = "src/calliope_pathways/models/italy_stationary/data_sources/investstep_series/available_vintages_techs.csv"
-    avail_vint_df.to_csv(avail_vint_path)
+    avail_vint_df = parse_available_vintages(INPUT_FILES["stationary"]["techs"], YEARS, option="share")
+    avail_vint_df.to_csv(OUTPUT_FILES["available_vintage_cap"])
 
     if test_figs:
         avail_ini_cap_df.loc[:, YEARS[0]:].T.plot(legend=False)
