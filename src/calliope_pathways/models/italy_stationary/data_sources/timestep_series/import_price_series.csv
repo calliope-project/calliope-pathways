@@ -1,6 +1,8 @@
+license,CC BY-NC 4.0,
+reference,https://doi.org/10.1016/j.joule.2020.08.002,
 comment,"Average of FR, CH, AT, SI, GR",GR in Lombardi’s study
 nodes,EUC,GRE
-techs,import_power,import_power
+techs,import_electricity,import_electricity
 timesteps,,
 2015-01-01 00:00:00,0.0511,0.0511
 2015-01-01 01:00:00,0.049,0.049

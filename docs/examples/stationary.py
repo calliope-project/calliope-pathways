@@ -14,10 +14,11 @@
 # ---
 
 # %% [markdown]
-# # National scale example model pathway optimisation
+# # Stationary example of pathway optimisation
 #
-# In this tutorial, we use the Calliope national scale example model to solve a pathway optimisation problem.
-# This model can be loaded in its non-pathway format within Calliope as `calliope.examples.national_scale()`.
+# This example solves a bounded stationary pathway optimisation problem.
+# This model can be loaded in its non-pathway format within Calliope as `calliope.examples.stationary()`.
+# It is based on the Italy model developed in https://github.com/FLomb/Calliope-Italy, with lower spatial resolution.
 
 # %%
 
@@ -33,35 +34,15 @@ calliope.set_log_verbosity("INFO", include_solver_output=False)
 # # Model input
 
 # %%
-# Initialise with the National Scale example model and the "pathways" scenario
+# Initialise
 model = calliope_pathways.models.italy_stationary()
 
 # %% [markdown]
 # ## Assessing the input data
 #
-# Pathway analysis requires to us have new timeseries dimensions to track investment decisions across years.
-# In this example, we define two dimensions: `investsteps` and `vintagesteps`.
-#
-# At each `investstep`, investment in new capacity is possible and some previously invested capacity is decommissioned as it has reached the end of its lifetime.
-# Investing in new capacity is likely to be necessary because of this end-of-life decommissioning but also because of phase-out decommissioning and operational constraints -
-# demand might have increased or emissions caps might be more strict requiring more zero-emissions technologies.
-# To verify that capacity in a given `investstep` is sufficient to meet that steps's operational constraints, technology dispatch is optimised in each step.
-#
-# For example, if you have the investment steps `[2030, 2040, 2050]` you will have three points at which to change technology capacities and three sets of annual dispatch decisions
-# (e.g., hourly dispatch over a whole year).
-#
-# Deployed capacity in every investment year will be a combination of capacities deployed in previous years.
-# Each will have a different age and may have different characteristics (maintenance costs, efficiency, etc.).
-# We refer to each of these previous capacities as "vintages" and track them using `vintagesteps`.
-# The available capacity in any `investstep` is the sum of all historical vintages.
-# For example, In 2040, the vintages from 2030 and 2040 are available.
-#
-# We use `vintagesteps` to track two things:
-# 1. when a technology is due for decommissioning (if we invested in 100kW of PV in 2030 and it has a 10-year lifetime, it will not be available in 2040).
-# 2. the characteristics of older models of a given technology.
-# We don't use this at the moment, except to track the investment costs of vintages - these costs are applied in every `investstep` that the given vintage is still available.
-#
-# Because we use the `steps` suffix for these dimensions, Calliope will read them in as timestamps.
+# The model can be configured by running the script in src/calliope_pathways/models/italy_stationary/pre_processing/parse_lombardi.py
+# It automatically assigns random decommission rates for each technology, accounting for their lifetimes.
+# The number of `vintagesteps` and `investsteps` can be similarly altered.
 
 # %%
 model.inputs.investsteps
@@ -70,16 +51,15 @@ model.inputs.investsteps
 model.inputs.vintagesteps
 
 # %% [markdown]
-# We can see some of our input data is indexed over these dimensions:
+# Stationary means that both costs and demand remain constant across the years:
 
 # %%
-# Decreasing costs of investing in technologies
 model.inputs.cost_flow_cap.to_series().dropna()
 
 # %% [markdown]
 # ### Initial capacity
 #
-# Unlike greenfield optimisation ("plan" mode in Calliope), pathway optimisation should be initialised with a certain amount of existing technology capacity:
+# The model is initialized with the capacity of Italy in 2015.
 
 # %%
 model.inputs.flow_cap_initial.to_series().dropna()
@@ -92,15 +72,7 @@ model.inputs.flow_cap_initial.to_series().dropna()
 model.inputs.available_initial_cap.to_series().dropna()
 
 # %% [markdown]
-# ### Vintages
-#
-# Technology vintages have specific characteristics, such as the cost to invest in the model.
-# Recently commercialised technologies may see their deployment costs decrease substantially in the first decade or two of mass deployment.
-# Even established technologies can reduce in cost over time as the manufacturing facilities and logistical pipelines are constantly optimised.
-
-# %% [markdown]
-# End-of-life decommissioning is tracked with a matrix similar to [initial capacities](#initial-capacity).
-# Fractional availability accounts for technologies whose lifetimes fall in-between two investment steps.
+# End-of-life decommissioning is tracked with a similar matrix.
 
 # Note how vintages are never available in investsteps that are in their _future_.
 model.inputs.available_vintages.to_series().dropna().unstack("investsteps")
@@ -134,16 +106,16 @@ model.math["constraints"]["system_balance"]
 # In each investment period, capacities are a combination of all available vintages.
 model.math["constraints"]["flow_cap_bounding"]
 
+# %%
+# Similarly, note that some technologies cannot go beyond their initial installed capacity.
+model.inputs.flow_cap_max.to_series().dropna()
+
 # %% [markdown]
 # ### Building
 
 # %%
-model.inputs.flow_cap_max.to_series().dropna()
-
-# %%
 model.build()
-model.backend.verbose_strings()
-model.backend.to_lp(OUTPUT_PATH+"test.lp")
+
 # %% [markdown]
 # ## Analyse results
 
@@ -152,8 +124,8 @@ model.solve()
 
 # %%
 df_capacity = (
-    model.results.flow_cap.where(model.results.techs != "demand_power")
-    .sel(carriers="power")
+    model.results.flow_cap.where(model.results.techs != "demand_electricity")
+    .sel(carriers="electricity")
     .sum("nodes")
     .to_series()
     .where(lambda x: x != 0)
@@ -196,8 +168,8 @@ fig.show()
 
 # %%
 df_capacity = (
-    model.results.flow_cap_new.where(model.results.techs != "demand_power")
-    .sel(carriers="power")
+    model.results.flow_cap_new.where(model.results.techs != "demand_electricity")
+    .sel(carriers="electricity")
     .sum("nodes")
     .to_series()
     .where(lambda x: x != 0)
@@ -220,7 +192,7 @@ fig.show()
 # %%
 df_outflow = (
     (model.results.flow_out.fillna(0) - model.results.flow_in.fillna(0))
-    .sel(carriers="power")
+    .sel(carriers="electricity")
     .sum(["nodes", "timesteps"], min_count=1)
     .to_series()
     .where(lambda x: x > 1)
@@ -239,7 +211,7 @@ fig = px.bar(
     color_discrete_map=model.inputs.color.to_series().to_dict(),
 )
 df_demand = (
-    model.results.flow_in.sel(techs="demand_power", carriers="power")
+    model.results.flow_in.sel(techs="demand_electricity", carriers="electricity")
     .sum(["nodes", "timesteps"])
     .to_series()
     .reset_index()
@@ -252,7 +224,7 @@ fig.show()
 # %%
 df_electricity = (
     (model.results.flow_out.fillna(0) - model.results.flow_in.fillna(0))
-    .sel(carriers="power")
+    .sel(carriers="electricity")
     .sum("nodes")
     .to_series()
     .where(lambda x: x != 0)
@@ -260,8 +232,8 @@ df_electricity = (
     .to_frame("Flow in/out (kWh)")
     .reset_index()
 )
-df_electricity_demand = df_electricity[df_electricity.techs == "demand_power"]
-df_electricity_other = df_electricity[df_electricity.techs != "demand_power"]
+df_electricity_demand = df_electricity[df_electricity.techs == "demand_electricity"]
+df_electricity_other = df_electricity[df_electricity.techs != "demand_electricity"]
 
 invest_order = sorted(df_electricity.investsteps.unique())
 

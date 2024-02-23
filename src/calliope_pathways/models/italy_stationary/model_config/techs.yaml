@@ -46,8 +46,8 @@ tech_groups:
   inter_zonal_transmission:
     name: "Transmission intra-zonal electricity"
     color: '#966F9E'
-    carrier_in: power
-    carrier_out: power
+    carrier_in: electricity
+    carrier_out: electricity
     base_tech: transmission
     lifetime: 40
     flow_out_eff: 0.96
@@ -73,7 +73,7 @@ techs: # Color scheme is Tol Qual Muted + some extras
     color: '#873737'
     base_tech: supply
     inherit: cost_dim_setter
-    carrier_out: power
+    carrier_out: electricity
     lifetime: 50
 
     cost_flow_cap.data: 4062 # EUR2010/kW lower than average IRENA cost in 2022USD normalized to EUR2010 for Italy.
@@ -84,7 +84,7 @@ techs: # Color scheme is Tol Qual Muted + some extras
     color: '#64D7CE'
     base_tech: supply
     inherit: cost_dim_setter
-    carrier_out: power
+    carrier_out: electricity
     include_storage: true  # TODO: unclear how to make this work
     source_unit: per_cap
     source_eff: 0.635
@@ -99,7 +99,7 @@ techs: # Color scheme is Tol Qual Muted + some extras
     color: '#6A0241'
     base_tech: supply
     inherit: cost_dim_setter
-    carrier_out: power
+    carrier_out: electricity
     flow_out_eff: 0.28
     lifetime: 20
 
@@ -111,11 +111,11 @@ techs: # Color scheme is Tol Qual Muted + some extras
     cost_flow_out.data: 0.03305 # EUR2010/kWh
 
   bioenergy:
-    name: "Biogas, biofuel and biomass power generation"
+    name: "Biogas, biofuel and biomass electricity generation"
     color: '#5AA24D'
     base_tech: supply
     inherit: cost_dim_setter
-    carrier_out: power
+    carrier_out: electricity
     flow_out_eff: 0.29
     lifetime: 18 # average in Lombardi's study
 
@@ -131,7 +131,7 @@ techs: # Color scheme is Tol Qual Muted + some extras
     color: '#000000'
     base_tech: supply
     inherit: cost_dim_setter
-    carrier_out: power
+    carrier_out: electricity
     flow_out_eff: 0.35
     flow_ramping: 0.6
     lifetime: 35
@@ -148,7 +148,7 @@ techs: # Color scheme is Tol Qual Muted + some extras
     color: '#5A5A5A'
     base_tech: supply
     inherit: cost_dim_setter
-    carrier_out: power
+    carrier_out: electricity
     flow_out_eff: 0.38
     flow_ramping: 0.6
     lifetime: 35
@@ -165,7 +165,7 @@ techs: # Color scheme is Tol Qual Muted + some extras
     color: '#A5A5A5'
     base_tech: supply
     inherit: cost_dim_setter
-    carrier_out: power
+    carrier_out: electricity
     flow_out_eff: 0.56
     flow_ramping: 0.8
     lifetime: 20
@@ -178,11 +178,11 @@ techs: # Color scheme is Tol Qual Muted + some extras
     cost_om_annual.data: 10.5 # EUR2010/kW/yr
 
   wind:
-    name: 'On-shore wind power'  # TODO: fix source
+    name: 'On-shore wind electricity'  # TODO: fix source
     color: '#47D154'
     base_tech: supply
     inherit: cost_dim_setter
-    carrier_out: power
+    carrier_out: electricity
     source_unit: per_cap
     lifetime: 20
 
@@ -191,11 +191,11 @@ techs: # Color scheme is Tol Qual Muted + some extras
     cost_om_annual.data: 38 # EUR2010/kW/yr
 
   pv:
-    name: "Photovoltaic power"  # TODO: fix source
+    name: "Photovoltaic electricity"  # TODO: fix source
     color: '#DDCC77'
     base_tech: supply
     inherit: cost_dim_setter
-    carrier_out: power
+    carrier_out: electricity
     source_unit: per_cap
     lifetime: 22
 
@@ -208,8 +208,8 @@ techs: # Color scheme is Tol Qual Muted + some extras
     color: '#882255'
     base_tech: storage
     inherit: cost_dim_setter
-    carrier_in: power
-    carrier_out: power
+    carrier_in: electricity
+    carrier_out: electricity
     flow_cap_max: # kW
     storage_cap_max: 2e8
     flow_cap_per_storage_cap_max: 0.25
@@ -229,8 +229,8 @@ techs: # Color scheme is Tol Qual Muted + some extras
     color: "#332288"
     base_tech: storage
     inherit: cost_dim_setter
-    carrier_in: power
-    carrier_out: power
+    carrier_in: electricity
+    carrier_out: electricity
     flow_cap_max: # kW
     flow_out_eff: 0.97
     flow_in_eff: 0.87
@@ -243,23 +243,23 @@ techs: # Color scheme is Tol Qual Muted + some extras
   ##
   # Demand, imports, exports
   ##
-  demand_power:
-    name: "Power demand"
+  demand_electricity:
+    name: "Electricity demand"
     color: "#072486"
     base_tech: demand
-    carrier_in: power
+    carrier_in: electricity
 
-  import_power:
-    name: "Power imports"
+  import_electricity:
+    name: "Electricity imports"
     color: '#E68A31'
     base_tech: supply
-    carrier_out: power
+    carrier_out: electricity
 
-  export_power:
-    name: "Power exports"
+  export_electricity:
+    name: "Electricity exports"
     color: '#E68A31'
     base_tech: demand
-    carrier_in: power
+    carrier_in: electricity
 
   ##
   # Transmission

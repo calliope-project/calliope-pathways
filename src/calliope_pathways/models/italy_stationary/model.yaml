@@ -13,14 +13,14 @@ config:
     calliope_version: 0.7.0
     # Activate pathways configuration
     add_math: [../../math/pathways.yaml]
-    time_resample: "48h"
+    time_resample: "1m"
 
   build:
     ensure_feasibility: true # Switches on the "unmet demand" constraint
     mode: plan # Choices: plan, operate
 
   solve:
-    solver: gurobi
+    solver: cbc
     zero_threshold: 1e-10 # Any value coming out of the backend that is smaller than this (due to floating point errors, probably) will be set to zero
     solver_options: # Taken directly from Lombardi's study
       Method: 2
@@ -96,42 +96,40 @@ data_sources:
   pv_source_max: # allows curtailment
     source: data_sources/timestep_series/pv_series.csv
     rows: timesteps
-    columns: [comment, nodes, techs, parameters]
-    drop: comment
+    columns: [license, reference, comment, nodes, techs, parameters]
+    drop: [license, reference, comment]
   wind_source_max: # allows curtailment
     source: data_sources/timestep_series/wind_series.csv
     rows: timesteps
-    columns: [comment, nodes, techs, parameters]
-    drop: comment
+    columns: [license, reference, comment, nodes, techs, parameters]
+    drop: [license, reference, comment]
   hydro_source_use_equals: # forces resource use
     source: data_sources/timestep_series/hydro_reservoir_series.csv
     rows: timesteps
-    columns: [comment, nodes, techs, parameters]
-    drop: comment
+    columns: [license, reference, comment, nodes, techs, parameters]
+    drop: [license, reference, comment]
 
   # Demand data
-  power_demand_source_use_equals:
+  electricity_demand_source_use_equals:
     source: data_sources/timestep_series/regional_demand_series.csv
     rows: timesteps
-    columns: nodes
-    add_dimensions:
-      techs: demand_power
-      parameters: sink_use_equals
+    columns: [license, reference, comment, nodes, techs, parameters]
+    drop: [license, reference, comment]
 
   # Import/export cost data
-  power_import_cost_flow_out:
+  electricity_import_cost_flow_out:
     source: data_sources/timestep_series/import_price_series.csv
     rows: timesteps
-    columns: [comment, nodes, techs]
-    drop: comment
+    columns: [license, reference, comment, nodes, techs]
+    drop: [license, reference, comment]
     add_dimensions:
       costs: monetary
       parameters: cost_flow_out
-  power_export_cost_flow_in:
+  electricity_export_cost_flow_in:
     source: data_sources/timestep_series/export_price_series.csv
     rows: timesteps
-    columns: [comment, nodes, techs]
-    drop: comment
+    columns: [license, reference, comment, nodes, techs]
+    drop: [license, reference, comment]
     add_dimensions:
       costs: monetary
       parameters: cost_flow_in

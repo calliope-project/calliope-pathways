@@ -1,4 +1,6 @@
-comment,Average of R1-8,Average of R9-11,Average of R12-14,Average of R15-18,R19,R20
+license,CC BY-NC 4.0,,,,,
+reference,https://doi.org/10.1016/j.joule.2020.08.002,,,,,
+comment,Averaged capacity factors for sub-regions in Lombardi’s study.,,,,,
 nodes,NORD,CNOR,CSUD,SUD,SICI,SARD
 techs,pv,pv,pv,pv,pv,pv
 parameters,source_use_max,source_use_max,source_use_max,source_use_max,source_use_max,source_use_max

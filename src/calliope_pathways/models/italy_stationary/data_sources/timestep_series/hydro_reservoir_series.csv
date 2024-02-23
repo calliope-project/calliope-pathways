@@ -1,4 +1,6 @@
-comment,taken from Lombardi’s model,taken from Lombardi’s model,taken from Lombardi’s model,taken from Lombardi’s model,taken from Lombardi’s model,taken from Lombardi’s model
+license,CC BY-NC 4.0,,,,,
+reference,https://doi.org/10.1016/j.joule.2020.08.002,,,,,
+comment,Combined hydro basin and RoR from Lombardi’s study.,,,,,
 nodes,NORD,CNOR,CSUD,SUD,SICI,SARD
 techs,hydropower,hydropower,hydropower,hydropower,hydropower,hydropower
 parameters,source_use_equals,source_use_equals,source_use_equals,source_use_equals,source_use_equals,source_use_equals

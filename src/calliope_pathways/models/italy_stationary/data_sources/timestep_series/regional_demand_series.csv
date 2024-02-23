@@ -1,4 +1,10 @@
-timesteps,NORD,CNOR,CSUD,SUD,SARD,SICI
+license,CC BY-NC 4.0,,,,,
+reference,https://doi.org/10.1016/j.joule.2020.08.002,,,,,
+comment,Regional 2015 demand in Lombardi’s study,,,,,
+nodes,NORD,CNOR,CSUD,SUD,SARD,SICI
+techs,demand_electricity,demand_electricity,demand_electricity,demand_electricity,demand_electricity,demand_electricity
+parameters,sink_use_equals,sink_use_equals,sink_use_equals,sink_use_equals,sink_use_equals,sink_use_equals
+timesteps,,,,,,
 2015-01-01 00:00:00,10849775.7537089,2324570.8173255,4498271.46754598,2375033.89646309,862658.826887444,1821500.76459834
 2015-01-01 01:00:00,10254220.6029671,2186856.6538604,4131217.17403678,2125827.11717047,820727.061509955,1684800.61167867
 2015-01-01 02:00:00,9705526.58989968,2044213.9288169,3846899.21559152,1995068.59572708,796562.320629492,1556175.38041848
