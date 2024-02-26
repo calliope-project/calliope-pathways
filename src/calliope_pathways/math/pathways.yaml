@@ -332,6 +332,48 @@ global_expressions:
   cost:
     foreach: [nodes, techs, costs, investsteps]
 
+  investment_year:
+    foreach: [investsteps]
+    equations:
+      - expression: year(investsteps)
+
+  vintage_year:
+    foreach: [vintagesteps]
+    equations:
+      - expression: year(vintagesteps)
+
+  available_vintages:
+    foreach: [vintagesteps, investsteps, techs]
+    equations:
+      - where: config.vintage_survival=weibull
+        expression: >-
+          exponential(
+            -(($year_diff / default_if_empty(lifetime, inf)) ** shape)
+            * (gamma(1 + 1 / shape) ** shape)
+          )
+      - where: config.vintage_survival=linear
+        expression: >-
+           clip(1 - ($year_diff / lifetime), lower=0)
+      - where: config.vintage_survival=step
+        expression: >-
+          clip(lifetime - $year_diff, lower=0) / (lifetime - $year_diff)
+    sub_expressions:
+      year_diff:
+        - expression: investment_year - vintage_year
+
+  available_vintages:
+    foreach: [vintagesteps, investsteps, techs]
+    equations:
+      - expression: get_available_vintages(weibull)
+
+  investstep_resolution:
+    foreach: [investsteps]
+    equations:
+      - where: investsteps=get_val_at_index(investsteps, 0)
+        expression: get_val_at_index(investment_year, 1) - initial_year
+      - where: NOT investsteps=get_val_at_index(investsteps, 0)
+        expression: investment_year - roll(investment_year, investsteps=1)
+
 objectives:
   min_cost_optimisation:
     equations:
