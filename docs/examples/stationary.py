@@ -17,8 +17,7 @@
 # # Stationary example of pathway optimisation
 #
 # This example solves a bounded stationary pathway optimisation problem.
-# This model can be loaded in its non-pathway format within Calliope as `calliope.examples.stationary()`.
-# It is based on the Italy model developed in https://github.com/FLomb/Calliope-Italy, with lower spatial resolution.
+# It is based on the Italy model developed in <https://github.com/FLomb/Calliope-Italy>, with lower spatial resolution.
 
 # %%
 
@@ -31,16 +30,16 @@ OUTPUT_PATH = "outputs/"
 calliope.set_log_verbosity("INFO", include_solver_output=False)
 
 # %% [markdown]
-# # Model input
+# ## Model input
 
 # %%
 # Initialise
 model = calliope_pathways.models.italy_stationary()
 
 # %% [markdown]
-# ## Assessing the input data
+# ### Assessing the input data
 #
-# The model can be configured by running the script in src/calliope_pathways/models/italy_stationary/pre_processing/parse_lombardi.py
+# The model can be configured by running the script in `src/calliope_pathways/models/italy_stationary/pre_processing/parse_lombardi.py`.
 # It automatically assigns random decommission rates for each technology, accounting for their lifetimes.
 # The number of `vintagesteps` and `investsteps` can be similarly altered.
 
@@ -73,8 +72,10 @@ model.inputs.available_initial_cap.to_series().dropna()
 
 # %% [markdown]
 # End-of-life decommissioning is tracked with a similar matrix.
-
+#
 # Note how vintages are never available in investsteps that are in their _future_.
+
+# %%
 model.inputs.available_vintages.to_series().dropna().unstack("investsteps")
 
 # %% [markdown]
