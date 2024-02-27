@@ -5,9 +5,12 @@ mkdocs-jupyter >= 0.24, < 0.25
 mkdocs-macros-plugin >= 1.0, < 2
 mkdocs-material >= 9.5, < 10
 mkdocstrings-python >= 1.7, < 2
+numpy
 pandas-stubs
 plotly >= 5, < 6
 pre-commit < 4
+scipy
 pytest < 8
 pytest-order < 2
 pytest-xdist < 4
+pyyaml

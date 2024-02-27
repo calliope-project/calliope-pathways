@@ -86,6 +86,7 @@ nav:
   - Examples and tutorials:
     - examples/index.md
     - examples/national_scale.py
+    - examples/stationary.py
   - Math Documentation:
     - math/index.md
   - Contributing: contributing.md

@@ -30,6 +30,13 @@ def national_scale(**kwargs) -> Model:
         **kwargs,
     )
 
+def italy_stationary(**kwargs) -> Model:
+    """Returns stationary test-case for Italy."""
+
+    return Model(
+        model_definition=src_dir_ref("models") / "italy_stationary" / "model.yaml",
+        **kwargs,
+    )
 
 def load(
     model_definition: str | Path, add_pathways_math: bool = True, **kwargs
