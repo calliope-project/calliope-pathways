@@ -1,4 +1,4 @@
-from calliope_pathways import models
+from calliope_pathways import helper_functions, models
 from calliope_pathways._version import __version__
 
 __title__ = "Calliope pathway optimisation"

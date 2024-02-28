@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Literal
 
 import numpy as np
 import scipy
@@ -30,28 +30,62 @@ class GetVintageAvailability(ParsingHelperFunction):
         availability = (life_diff).clip(min=0) / life_diff
         return availability
 
+    def as_math_string(self, method: Literal["weibull", "linear", "step"]) -> str:
+        alpha = r"\textit{age}_\text{tech}"
+        beta = r"\textit{shape}"
+        eta = r"\textit{lifetime}_\text{tech}"
+        match method:
+            case "weibull":
+                math_str = rf"\exp{{-(frac{{{alpha}}}{{{eta}}})^{{{beta}}}\times\Gamma{{1+frac{{1}}{{{beta}}})^{{{beta}}}}}}}"
+            case "linear":
+                math_str = rf"""
+                \begin{{cases}}
+                1\mathord{{-}}frac{{{alpha}}}{{{eta}}}, & \text{{if }} 1\mathord{{-}}frac{{{alpha}}}{{{eta}}}\gt{{}}0\\
+                0, & \text{{otherwise}}\\
+                \end{{cases}}
+                """
+            case "step":
+                math_str = rf"""
+                \begin{{cases}}
+                1, & \text{{if }} {eta}\mathord{{-}}{alpha}\gt{{}}0\\
+                0, & \text{{otherwise}}\\
+                \end{{cases}}
+                """
+            case _:
+                raise ValueError(
+                    f"Cannot get vintage availability with `method`: {method}"
+                )
+        return math_str
+
     def as_array(self, method: Literal["weibull", "linear", "step"]) -> xr.DataArray:
-        """For each investment step in pathway optimisation, get the historical capacity additions that now must be decommissioned.
+        """For each investment step in pathway optimisation, get the remaining availability of each historical capacity addition as a fraction.
 
         Args:
-            array (xr.DataArray): A capacity decision variable (`flow_cap`, `storage_cap`, etc.)
+            method (Literal[weibull, linear, step]):
+                The method used to describe the ageing curve of the historical capacity:
+                - weibull: Apply a weibull function to produce technology survival curves. See <https://doi.org/10.1186/s12544-020-00464-0> for more detail.
+                - linear: Apply a linear ageing, such that 50% of the technology capacity exists half way through the technology lifetime.
+                - step: Apply a function such that 100% of the technology capacity exists until the distance between the deployment and investment years is greater than the technology age.
 
         Returns:
-            xr.DataArray:
+            xr.DataArray: Array of vintage availabilities as fractions. Any index items referring to vintage year > investment year are nullified.
         """
         year_diff = (
             self._input_data.investsteps.dt.year - self._input_data.vintagesteps.dt.year
         )
         year_diff_no_negative = year_diff.where(year_diff >= 0)
-        if method == "weibull":
-            availability = self._weibull_func(year_diff_no_negative)
-        elif method == "linear":
-            availability = self._linear_func(year_diff_no_negative)
-        elif method == "step":
-            availability = self._step_func(year_diff_no_negative)
-        else:
-            raise ValueError(f"Cannot get vintage availability with `method`: {method}")
-        return availability.where(year_diff_no_negative.notnull())
+        match method:
+            case "weibull":
+                availability = self._weibull_func(year_diff_no_negative)
+            case "linear":
+                availability = self._linear_func(year_diff_no_negative)
+            case "step":
+                availability = self._step_func(year_diff_no_negative)
+            case _:
+                raise ValueError(
+                    f"Cannot get vintage availability with `method`: {method}"
+                )
+        return availability.where(year_diff_no_negative.notnull()).fillna(0)
 
 
 class Resolution(ParsingHelperFunction):
@@ -87,54 +121,3 @@ class Year(ParsingHelperFunction):
 
     def as_array(self, array: xr.DataArray) -> xr.DataArray:
         return array.dt.year
-
-
-class Exponential(ParsingHelperFunction):
-    #:
-    NAME = "exponential"
-    #:
-    ALLOWED_IN = ["expression"]
-
-    def as_math_string(self, array: str) -> str:
-        return rf"\exp^{{{array}}}"
-
-    def as_array(self, array: xr.DataArray) -> xr.DataArray:
-        return np.exp(array)
-
-
-class Gamma(ParsingHelperFunction):
-    #:
-    NAME = "gamma"
-    #:
-    ALLOWED_IN = ["expression"]
-
-    def as_math_string(self, array: str) -> str:
-        return rf"\Gamma({array})"
-
-    def as_array(self, array: xr.DataArray) -> xr.DataArray:
-        return scipy.special.gamma(array)
-
-
-class Clip(ParsingHelperFunction):
-    #:
-    NAME = "clip"
-    #:
-    ALLOWED_IN = ["expression"]
-
-    def as_math_string(
-        self, array: str, lower: Optional[str] = None, upper: Optional[str] = None
-    ) -> str:
-        base = rf"\text{{clip}}({array}"
-        if lower is not None:
-            base += rf", \text{{lower}}={lower}"
-        if upper is not None:
-            base += rf", \text{{upper}}={upper}"
-        return base + ")"
-
-    def as_array(
-        self,
-        array: xr.DataArray,
-        lower: Optional[str] = None,
-        upper: Optional[str] = None,
-    ) -> xr.DataArray:
-        return array.clip(min=lower, max=upper)

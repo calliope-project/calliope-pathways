@@ -27,10 +27,7 @@ parameters:
     dims: costs
   # `bigM` sets the scale of unmet demand, which cannot be too high, otherwise the optimisation will not converge
   bigM: 1e6
-  investstep_resolution:
-    data: 10
-    index: [2020, 2030, 2040, 2050]
-    dims: investsteps
+  initial_year: 2015
 
 data_sources:
   csp_source:
@@ -51,11 +48,3 @@ data_sources:
     columns: vintagesteps
     add_dimensions:
       costs: monetary
-
-  # An idea for better handling of "decommissioning", by splitting the available capacity between investment steps
-  vintage_availability:
-    source: data_sources/vintage_availability.csv
-    rows: techs
-    columns: [vintagesteps, investsteps]
-    add_dimensions:
-      parameters: available_vintages
