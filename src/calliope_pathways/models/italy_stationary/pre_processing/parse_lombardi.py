@@ -8,7 +8,7 @@ import requests
 from scipy.special import gamma
 from yaml import safe_load
 
-# >> Model setup >> User configurable
+# -> Model setup -> User configurable
 # Years
 YEAR_STEP = 10
 YEARS = np.arange(2020, 2050+YEAR_STEP, YEAR_STEP)
@@ -19,14 +19,14 @@ BETA_MAX = 8
 AGE_FACTOR_MIN = 0.1
 AGE_FACTOR_MAX = 0.8
 # Technologies with no growth
-FROZEN_TECHS = ["geothermal", "battery_phs", "hydropower", "waste", "ccgt", "coal", "oil"]
-# << Model setup <<
+FROZEN_TECHS = ["geothermal", "battery_phs", "hydropower", "waste"]
+# <- Model setup <-
 
-# >> Parsing setup >> DO NOT MODIFY!
+# -> Parsing setup -> DO NOT MODIFY!
 BASIC_V07_COLS = ["nodes", "techs", "parameters", "values"]
 INPUT_FILES = {
     "Calliope-Italy": {
-        "locations": "https://raw.githubusercontent.com/FLomb/Calliope-Italy/master/italy_20_regions_v.0.2/Model/model_config/locations.yaml"
+        "locations": "https://raw.githubusercontent.com/FLomb/Calliope-Italy/power_to_heat/italy_20_regions_v.0.1_heat/calliope_model/model_config/locations.yaml"
     },
     "stationary": {
         "techs": "src/calliope_pathways/models/italy_stationary/model_config/techs.yaml"
@@ -63,14 +63,14 @@ NODE_GROUPING = {
 NODE_GROUPING = {k: [k] + i for k, i in NODE_GROUPING.items()}
 # Parameter conversion
 PARAM_V068_TO_V07 = {
-    "flow_cap_initial": ["energy_cap_equals", "energy_cap_max"],
+    "flow_cap_initial": ["energy_cap_equals"],
     "storage_cap_initial": ["storage_cap_equals"],
 }
 PARAM_INI_TO_MAX = { # TODO: this should be converted from Lombardi's file instead
     "flow_cap_initial": "flow_cap_max",
     "storage_cap_initial": "storage_cap_max",
 }
-# << Parsing setup <<
+# <- Parsing setup <-
 
 def _location_yaml_to_df(yaml_data: dict, calliope_version: str = "0.6.8") -> pd.DataFrame:
     """Converts a location yaml into a searchable dataframe."""

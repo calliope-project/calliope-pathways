@@ -14,3 +14,5 @@ pytest < 8
 pytest-order < 2
 pytest-xdist < 4
 pyyaml
+pycountry
+pint-pandas
