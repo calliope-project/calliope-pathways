@@ -62,11 +62,11 @@ NODE_GROUPING = {
 }
 NODE_GROUPING = {k: [k] + i for k, i in NODE_GROUPING.items()}
 # Parameter conversion
-PARAM_V068_TO_V07 = {
+PARAM_INI_CAP_GROUPING = {
     "flow_cap_initial": ["energy_cap_equals"],
     "storage_cap_initial": ["storage_cap_equals"],
 }
-PARAM_INI_TO_MAX = { # TODO: this should be converted from Lombardi's file instead
+PARAM_INI_TO_MAX = {
     "flow_cap_initial": "flow_cap_max",
     "storage_cap_initial": "storage_cap_max",
 }
@@ -82,11 +82,11 @@ def _location_yaml_to_df(yaml_data: dict, calliope_version: str = "0.6.8") -> pd
 
         # Arrange commands into something sensible
         command_split = [
-            "nodes",
-            "node attributes",
-            "items",
-            "item attributes",
-            "parameters",
+            "lombardi_loc",
+            "lombardi_loc_attr",
+            "lombardi_item",
+            "lombardi_item_attr",
+            "lombardi_param",
         ]
         yaml_df[command_split] = yaml_df["commands"].str.split(".", expand=True)
         yaml_df = yaml_df.drop(columns="commands")
@@ -139,48 +139,40 @@ def __test_group_completion(col: pd.Series, group_dict: dict) -> bool:
     return sorted(col.unique()) == sorted([i for j in group_dict.values() for i in j])
 
 
+def transform_column(df: pd.DataFrame, column: str, grouping: dict, dtype="string") -> pd.Series:
+
+    data_series = pd.Series(np.nan, index=df.index, dtype=dtype)
+
+    for node, loc_group in grouping.items():
+        data_series.loc[df[column].isin(loc_group)] = node
+    if any(pd.isna(data_series)):
+        raise ValueError(f"Missing values while transforming {column}.")
+    return data_series
+
 def parse_initial_cap(loc_yml_path: str, calliope_version="0.6.8") -> pd.DataFrame:
     """Extract initial installed capacity (2015 values)."""
-    loc_yml_data = safe_load(requests.get(loc_yml_path).text)
-    loc_yaml_df = _location_yaml_to_df(loc_yml_data, calliope_version)
+    yml_loc = safe_load(requests.get(loc_yml_path).text)
+    df_loc = _location_yaml_to_df(yml_loc, calliope_version)
 
-    # Find exclusively numeric teach params in each location
-    loc_tech_df = loc_yaml_df[
-        (loc_yaml_df["node attributes"] == "techs")
-        & (loc_yaml_df["item attributes"] == "constraints")
-        & (loc_yaml_df["parameters"] != "resource")
+    # Find exclusively numeric teach parameters in each location
+    df_loc_tech = df_loc[
+        (df_loc["lombardi_loc_attr"] == "techs")
+        & (df_loc["lombardi_item_attr"] == "constraints")
+        & (df_loc["lombardi_param"] != "resource")
     ]
+    if any(pd.isna(df_loc_tech["values"])):
+        raise ValueError("Empty numeric parameter values in parsed Lombardi data.")
 
-    # Run tests
-    assert (
-        pd.to_numeric(loc_tech_df["values"], errors="coerce").notnull().all()
-    ), "Invalid numeric values"
-    assert __test_group_completion(
-        loc_tech_df["nodes"], NODE_GROUPING
-    ), "Missing nodes in group"
-    assert __test_group_completion(
-        loc_tech_df["items"], TECH_GROUPING
-    ), "Missing techs in group"
-    assert __test_group_completion(
-        loc_tech_df["parameters"], PARAM_V068_TO_V07
-    ), "Missing parameters in group"
+
+    df_loc_tech = df_loc_tech.assign(nodes=transform_column(df_loc_tech, "lombardi_loc", NODE_GROUPING))
+    df_loc_tech = df_loc_tech.assign(techs=transform_column(df_loc_tech, "lombardi_item", TECH_GROUPING))
+    df_loc_tech = df_loc_tech.assign(parameters=transform_column(df_loc_tech, "lombardi_param", PARAM_INI_CAP_GROUPING))
 
     # build initial capacity datafile
-    ini_cap_df = pd.DataFrame(columns=BASIC_V07_COLS)
+    df_ini_cap = df_loc_tech.groupby(["nodes", "techs", "parameters"]).sum()["values"]
+    df_ini_cap = df_ini_cap.reset_index()[BASIC_V07_COLS]
 
-    for n, n_group in NODE_GROUPING.items():
-        node_df = loc_tech_df[loc_tech_df["nodes"].isin(n_group)]
-        for t, t_group in TECH_GROUPING.items():
-            tech_df = node_df[node_df["items"].isin(t_group)]
-            for p, p_group in PARAM_V068_TO_V07.items():
-                param_df = tech_df[tech_df["parameters"].isin(p_group)]
-                if not param_df.empty:
-                    aggregated_data = pd.Series(
-                        data=[n, t, p, param_df["values"].sum()], index=BASIC_V07_COLS
-                    )
-                    ini_cap_df.loc[len(ini_cap_df.index)] = aggregated_data
-
-    return ini_cap_df
+    return df_ini_cap
 
 
 def parse_cap_max(ini_cap_csv_path: str, techs: list) -> pd.DataFrame:
