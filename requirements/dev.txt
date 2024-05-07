@@ -1,7 +1,7 @@
 glpk == 5.0
 jsonschema2md >= 1, < 2
-mkdocs >= 1.5, < 2
-mkdocs-jupyter >= 0.24, < 0.25
+mkdocs >= 1.5, < 1.6
+mkdocs-jupyter >= 0.24, < 0.24.7
 mkdocs-macros-plugin >= 1.0, < 2
 mkdocs-material >= 9.5, < 10
 mkdocstrings-python >= 1.7, < 2
