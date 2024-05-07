@@ -139,15 +139,29 @@ def __test_group_completion(col: pd.Series, group_dict: dict) -> bool:
     return sorted(col.unique()) == sorted([i for j in group_dict.values() for i in j])
 
 
-def transform_column(df: pd.DataFrame, column: str, grouping: dict, dtype="string") -> pd.Series:
+def transform_series(series: pd.Series, grouping: dict, dtype="string") -> pd.Series:
+    """Use a grouping dictionary to transform a pandas Series.
 
-    data_series = pd.Series(np.nan, index=df.index, dtype=dtype)
+    Groupings are defined as {new_name:[old_name, ..., other_oldname],...}.
 
-    for node, loc_group in grouping.items():
-        data_series.loc[df[column].isin(loc_group)] = node
-    if any(pd.isna(data_series)):
-        raise ValueError(f"Missing values while transforming {column}.")
-    return data_series
+    Args:
+        df (pd.Series): dataframe with the column to transform.
+        grouping (dict): grouping to use for the transformation.
+        dtype (str, optional): dtype to set for the new data series. Defaults to "string".
+
+    Raises:
+        ValueError: grouping was not exhaustive (not all original values covered).
+
+    Returns:
+        pd.Series: transformed data series.
+    """
+    transformed = pd.Series(np.nan, index=series.index, dtype=dtype)
+
+    for new, old_group in grouping.items():
+        transformed.loc[series.isin(old_group)] = new
+    if any(pd.isna(transformed)):
+        raise ValueError(f"Missing values while transforming {series}.")
+    return transformed
 
 def parse_initial_cap(loc_yml_path: str, calliope_version="0.6.8") -> pd.DataFrame:
     """Extract initial installed capacity (2015 values)."""
@@ -164,9 +178,9 @@ def parse_initial_cap(loc_yml_path: str, calliope_version="0.6.8") -> pd.DataFra
         raise ValueError("Empty numeric parameter values in parsed Lombardi data.")
 
 
-    df_loc_tech = df_loc_tech.assign(nodes=transform_column(df_loc_tech, "lombardi_loc", NODE_GROUPING))
-    df_loc_tech = df_loc_tech.assign(techs=transform_column(df_loc_tech, "lombardi_item", TECH_GROUPING))
-    df_loc_tech = df_loc_tech.assign(parameters=transform_column(df_loc_tech, "lombardi_param", PARAM_INI_CAP_GROUPING))
+    df_loc_tech = df_loc_tech.assign(nodes=transform_series(df_loc_tech["lombardi_loc"], NODE_GROUPING))
+    df_loc_tech = df_loc_tech.assign(techs=transform_series(df_loc_tech["lombardi_item"], TECH_GROUPING))
+    df_loc_tech = df_loc_tech.assign(parameters=transform_series(df_loc_tech["lombardi_param"], PARAM_INI_CAP_GROUPING))
 
     # build initial capacity datafile
     df_ini_cap = df_loc_tech.groupby(["nodes", "techs", "parameters"]).sum()["values"]

@@ -16,3 +16,4 @@ pytest-xdist < 4
 pyyaml
 pycountry
 pint-pandas
+powerplantmatching == 0.5.14
