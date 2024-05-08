@@ -239,7 +239,7 @@ def transform_ppm_capacity_to_calliope(plants: pd.DataFrame, parameter: str, cap
 def main():
     countries = ["Italy"]
     year = 2015 * u.year
-    nuts_file = "src/calliope_pathways/models/italy_stationary/data_sources/NUTS_RG_20M_2021_4326.geojson"
+    nuts_file = "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_20M_2021_4326.geojson"
     save_path = "src/calliope_pathways/models/italy_stationary/data_sources/initial_capacity_techs_ppm_kw.csv"
 
     plants = extract_ppm()
