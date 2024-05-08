@@ -1,13 +1,14 @@
 """List of lazy parsing scripts to convert files from Lombardi's study."""
 import random
+from math import gamma
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import requests
-from scipy.special import gamma
 from yaml import safe_load
 
+# TODO: this could be a yaml file + schema... although it may be too specific
 # -> Model setup -> User configurable
 # Years
 YEAR_STEP = 10
@@ -134,11 +135,6 @@ def _weibull(year: int, lifetime: float, shape: float, year_shift: int = 0, zero
     return wb
 
 
-def __test_group_completion(col: pd.Series, group_dict: dict) -> bool:
-    """Check if a group dictionary covers all the possible values of a column."""
-    return sorted(col.unique()) == sorted([i for j in group_dict.values() for i in j])
-
-
 def transform_series(series: pd.Series, grouping: dict, dtype="string") -> pd.Series:
     """Use a grouping dictionary to transform a pandas Series.
 
@@ -168,7 +164,7 @@ def parse_initial_cap(loc_yml_path: str, calliope_version="0.6.8") -> pd.DataFra
     yml_loc = safe_load(requests.get(loc_yml_path).text)
     df_loc = _location_yaml_to_df(yml_loc, calliope_version)
 
-    # Find exclusively numeric teach parameters in each location
+    # Find exclusively numeric tech parameters in each location
     df_loc_tech = df_loc[
         (df_loc["lombardi_loc_attr"] == "techs")
         & (df_loc["lombardi_item_attr"] == "constraints")
