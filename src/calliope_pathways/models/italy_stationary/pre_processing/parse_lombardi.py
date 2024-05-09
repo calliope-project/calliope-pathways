@@ -1,14 +1,15 @@
 """List of lazy parsing scripts to convert files from Lombardi's study."""
 import random
+from math import gamma
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import requests
-from scipy.special import gamma
 from yaml import safe_load
 
-# >> Model setup >> User configurable
+# TODO: this could be a yaml file + schema... although it may be too specific
+# -> Model setup -> User configurable
 # Years
 YEAR_STEP = 10
 YEARS = np.arange(2020, 2050+YEAR_STEP, YEAR_STEP)
@@ -19,14 +20,14 @@ BETA_MAX = 8
 AGE_FACTOR_MIN = 0.1
 AGE_FACTOR_MAX = 0.8
 # Technologies with no growth
-FROZEN_TECHS = ["geothermal", "battery_phs", "hydropower", "waste", "ccgt", "coal", "oil"]
-# << Model setup <<
+FROZEN_TECHS = ["geothermal", "battery_phs", "hydropower", "waste"]
+# <- Model setup <-
 
-# >> Parsing setup >> DO NOT MODIFY!
+# -> Parsing setup -> DO NOT MODIFY!
 BASIC_V07_COLS = ["nodes", "techs", "parameters", "values"]
 INPUT_FILES = {
     "Calliope-Italy": {
-        "locations": "https://raw.githubusercontent.com/FLomb/Calliope-Italy/master/italy_20_regions_v.0.2/Model/model_config/locations.yaml"
+        "locations": "https://raw.githubusercontent.com/FLomb/Calliope-Italy/power_to_heat/italy_20_regions_v.0.1_heat/calliope_model/model_config/locations.yaml"
     },
     "stationary": {
         "techs": "src/calliope_pathways/models/italy_stationary/model_config/techs.yaml"
@@ -62,15 +63,15 @@ NODE_GROUPING = {
 }
 NODE_GROUPING = {k: [k] + i for k, i in NODE_GROUPING.items()}
 # Parameter conversion
-PARAM_V068_TO_V07 = {
-    "flow_cap_initial": ["energy_cap_equals", "energy_cap_max"],
+PARAM_INI_CAP_GROUPING = {
+    "flow_cap_initial": ["energy_cap_equals"],
     "storage_cap_initial": ["storage_cap_equals"],
 }
-PARAM_INI_TO_MAX = { # TODO: this should be converted from Lombardi's file instead
+PARAM_INI_TO_MAX = {
     "flow_cap_initial": "flow_cap_max",
     "storage_cap_initial": "storage_cap_max",
 }
-# << Parsing setup <<
+# <- Parsing setup <-
 
 def _location_yaml_to_df(yaml_data: dict, calliope_version: str = "0.6.8") -> pd.DataFrame:
     """Converts a location yaml into a searchable dataframe."""
@@ -82,11 +83,11 @@ def _location_yaml_to_df(yaml_data: dict, calliope_version: str = "0.6.8") -> pd
 
         # Arrange commands into something sensible
         command_split = [
-            "nodes",
-            "node attributes",
-            "items",
-            "item attributes",
-            "parameters",
+            "lombardi_loc",
+            "lombardi_loc_attr",
+            "lombardi_item",
+            "lombardi_item_attr",
+            "lombardi_param",
         ]
         yaml_df[command_split] = yaml_df["commands"].str.split(".", expand=True)
         yaml_df = yaml_df.drop(columns="commands")
@@ -134,53 +135,54 @@ def _weibull(year: int, lifetime: float, shape: float, year_shift: int = 0, zero
     return wb
 
 
-def __test_group_completion(col: pd.Series, group_dict: dict) -> bool:
-    """Check if a group dictionary covers all the possible values of a column."""
-    return sorted(col.unique()) == sorted([i for j in group_dict.values() for i in j])
+def transform_series(series: pd.Series, grouping: dict, dtype="string") -> pd.Series:
+    """Use a grouping dictionary to transform a pandas Series.
 
+    Groupings are defined as {new_name:[old_name, ..., other_oldname],...}.
+
+    Args:
+        df (pd.Series): dataframe with the column to transform.
+        grouping (dict): grouping to use for the transformation.
+        dtype (str, optional): dtype to set for the new data series. Defaults to "string".
+
+    Raises:
+        ValueError: grouping was not exhaustive (not all original values covered).
+
+    Returns:
+        pd.Series: transformed data series.
+    """
+    transformed = pd.Series(np.nan, index=series.index, dtype=dtype)
+
+    for new, old_group in grouping.items():
+        transformed.loc[series.isin(old_group)] = new
+    if any(pd.isna(transformed)):
+        raise ValueError(f"Missing values while transforming {series}.")
+    return transformed
 
 def parse_initial_cap(loc_yml_path: str, calliope_version="0.6.8") -> pd.DataFrame:
     """Extract initial installed capacity (2015 values)."""
-    loc_yml_data = safe_load(requests.get(loc_yml_path).text)
-    loc_yaml_df = _location_yaml_to_df(loc_yml_data, calliope_version)
+    yml_loc = safe_load(requests.get(loc_yml_path).text)
+    df_loc = _location_yaml_to_df(yml_loc, calliope_version)
 
-    # Find exclusively numeric teach params in each location
-    loc_tech_df = loc_yaml_df[
-        (loc_yaml_df["node attributes"] == "techs")
-        & (loc_yaml_df["item attributes"] == "constraints")
-        & (loc_yaml_df["parameters"] != "resource")
+    # Find exclusively numeric tech parameters in each location
+    df_loc_tech = df_loc[
+        (df_loc["lombardi_loc_attr"] == "techs")
+        & (df_loc["lombardi_item_attr"] == "constraints")
+        & (df_loc["lombardi_param"] != "resource")
     ]
+    if any(pd.isna(df_loc_tech["values"])):
+        raise ValueError("Empty numeric parameter values in parsed Lombardi data.")
 
-    # Run tests
-    assert (
-        pd.to_numeric(loc_tech_df["values"], errors="coerce").notnull().all()
-    ), "Invalid numeric values"
-    assert __test_group_completion(
-        loc_tech_df["nodes"], NODE_GROUPING
-    ), "Missing nodes in group"
-    assert __test_group_completion(
-        loc_tech_df["items"], TECH_GROUPING
-    ), "Missing techs in group"
-    assert __test_group_completion(
-        loc_tech_df["parameters"], PARAM_V068_TO_V07
-    ), "Missing parameters in group"
+
+    df_loc_tech = df_loc_tech.assign(nodes=transform_series(df_loc_tech["lombardi_loc"], NODE_GROUPING))
+    df_loc_tech = df_loc_tech.assign(techs=transform_series(df_loc_tech["lombardi_item"], TECH_GROUPING))
+    df_loc_tech = df_loc_tech.assign(parameters=transform_series(df_loc_tech["lombardi_param"], PARAM_INI_CAP_GROUPING))
 
     # build initial capacity datafile
-    ini_cap_df = pd.DataFrame(columns=BASIC_V07_COLS)
+    df_ini_cap = df_loc_tech.groupby(["nodes", "techs", "parameters"]).sum()["values"]
+    df_ini_cap = df_ini_cap.reset_index()[BASIC_V07_COLS]
 
-    for n, n_group in NODE_GROUPING.items():
-        node_df = loc_tech_df[loc_tech_df["nodes"].isin(n_group)]
-        for t, t_group in TECH_GROUPING.items():
-            tech_df = node_df[node_df["items"].isin(t_group)]
-            for p, p_group in PARAM_V068_TO_V07.items():
-                param_df = tech_df[tech_df["parameters"].isin(p_group)]
-                if not param_df.empty:
-                    aggregated_data = pd.Series(
-                        data=[n, t, p, param_df["values"].sum()], index=BASIC_V07_COLS
-                    )
-                    ini_cap_df.loc[len(ini_cap_df.index)] = aggregated_data
-
-    return ini_cap_df
+    return df_ini_cap
 
 
 def parse_cap_max(ini_cap_csv_path: str, techs: list) -> pd.DataFrame:
