@@ -48,16 +48,16 @@ parameters:
 data_sources:
   # Initial setup
   initial_tech_capacity_params:
-    source: data_sources/initial_capacity_techs_kw.csv
+    source: data_sources/flow_cap_initial_techs_kw.csv
     rows: [nodes, techs, parameters]
     columns: [values]
     drop: values
   initial_transmission_capacity_params:
-    source: data_sources/initial_capacity_transmission_kw.csv
+    source: data_sources/flow_cap_initial_transmission_kw.csv
     rows: [comment, techs, parameters]
     drop: comment
   maximum_capacity_params:
-    source: data_sources/max_capacity_techs_kw.csv
+    source: data_sources/cap_max_techs_kw.csv
     rows: [nodes, techs, parameters]
     columns: [values]
     drop: values

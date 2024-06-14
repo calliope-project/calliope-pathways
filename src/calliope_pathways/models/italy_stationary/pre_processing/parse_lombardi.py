@@ -34,8 +34,8 @@ INPUT_FILES = {
     }
 }
 OUTPUT_FILES = {
-    "cap_initial": "src/calliope_pathways/models/italy_stationary/data_sources/initial_capacity_techs_kw.csv",
-    "cap_max": "src/calliope_pathways/models/italy_stationary/data_sources/max_capacity_techs_kw.csv",
+    "cap_initial": "src/calliope_pathways/models/italy_stationary/data_sources/flow_cap_initial_techs_kw.csv",
+    "cap_max": "src/calliope_pathways/models/italy_stationary/data_sources/cap_max_techs_kw.csv",
     "available_initial_cap": "src/calliope_pathways/models/italy_stationary/data_sources/investstep_series/available_initial_cap_techs.csv",
     "available_vintage_cap": "src/calliope_pathways/models/italy_stationary/data_sources/investstep_series/available_vintages_techs.csv"
 }
