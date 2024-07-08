@@ -3,19 +3,6 @@
 ##
 
 nodes:
-  # Import/export regions
-  EUC:
-    techs:
-      import_electricity:
-      export_electricity:
-    latitude: 46.382945
-    longitude: 8.756699
-  GRE:
-    techs:
-      import_electricity:
-      export_electricity:
-    latitude: 39.430745
-    longitude: 20.610642
   # Italy regions
   NORD:
     techs:
@@ -28,6 +15,9 @@ nodes:
       waste:
       bioenergy:
       battery_li:
+      import_electricity:
+        flow_cap_initial: 1680000  # Sum of yearly average NTC according to ENTSOe for 2014
+      export_electricity:
     latitude: 45.219847
     longitude: 9.624722
   CNOR:
@@ -71,6 +61,9 @@ nodes:
       coal:
       oil:
       battery_li:
+      import_electricity:
+        flow_cap_initial: 0  # Sum of yearly average NTC according to ENTSOe for 2014
+      export_electricity:
     latitude: 40.678274
     longitude: 16.597098
   SICI:

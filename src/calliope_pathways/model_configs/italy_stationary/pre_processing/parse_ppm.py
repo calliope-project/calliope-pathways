@@ -7,6 +7,7 @@ Unfortunately, storage data is quite incomplete in powerplantmatching.
 Related functions have been removed, as linear or logarithmic regressions do not seem
 adequate when filling these values.
 """
+
 from typing import Optional
 
 import geopandas as gpd
@@ -22,17 +23,7 @@ u = pint_pandas.PintType.ureg
 
 # TODO: these approaches are pretty forced. A yaml+schema would be a better option.
 NODE_GROUPING = {
-    "NORD": [
-        "ITC1",
-        "ITC2",
-        "ITC3",
-        "ITC4",
-        "ITH1",
-        "ITH2",
-        "ITH3",
-        "ITH4",
-        "ITH5",
-    ],
+    "NORD": ["ITC1", "ITC2", "ITC3", "ITC4", "ITH1", "ITH2", "ITH3", "ITH4", "ITH5"],
     "CNOR": ["ITI1", "ITI2", "ITI3"],
     "CSUD": ["ITI4", "ITF1", "ITF3"],
     "SUD": ["ITF2", "ITF4", "ITF5", "ITF6"],
@@ -40,47 +31,26 @@ NODE_GROUPING = {
     "SARD": ["ITG2"],
 }
 TECH_GROUPING = {
-    "ccgt": {
-        "Fueltype": "Natural Gas",
-        "Technology": ["CCGT", "", "Steam Turbine"],
-    },
+    "ccgt": {"Fueltype": "Natural Gas", "Technology": ["CCGT", "", "Steam Turbine"]},
     "hydropower": {
         "Fueltype": "Hydro",
         "Technology": ["Run-Of-River", "Reservoir", "Unknown"],
     },
-    "wind": {
-        "Fueltype": "Wind",
-        "Technology": ["Onshore"],
-    },
-    "pv": {
-        "Fueltype": "Solar",
-        "Technology": ["Pv", ""],
-    },
+    "wind": {"Fueltype": "Wind", "Technology": ["Onshore"]},
+    "pv": {"Fueltype": "Solar", "Technology": ["Pv", ""]},
     "battery_phs": {
         "Fueltype": "Hydro",
         "Technology": ["Pumped Storage"],
-        "Storage": True
+        "Storage": True,
     },
     "waste": {
         "Fueltype": "Other",
         "Technology": ["Steam Turbine"],
     },  # Assumption: remaining powerplants use waste
-    "bioenergy": {
-        "Fueltype": "Bioenergy",
-        "Technology": ["Steam Turbine", ""],
-    },
-    "oil": {
-        "Fueltype": "Oil",
-        "Technology": ["Steam Turbine", ""],
-    },
-    "geothermal": {
-        "Fueltype": "Geothermal",
-        "Technology": ["Steam Turbine", ""],
-    },
-    "coal": {
-        "Fueltype": "Hard Coal",
-        "Technology": ["CCGT", "Steam Turbine"],
-    },
+    "bioenergy": {"Fueltype": "Bioenergy", "Technology": ["Steam Turbine", ""]},
+    "oil": {"Fueltype": "Oil", "Technology": ["Steam Turbine", ""]},
+    "geothermal": {"Fueltype": "Geothermal", "Technology": ["Steam Turbine", ""]},
+    "coal": {"Fueltype": "Hard Coal", "Technology": ["CCGT", "Steam Turbine"]},
 }
 
 
@@ -116,8 +86,7 @@ def extract_ppm() -> pd.DataFrame:
 
 @u.check(None, "[time]")
 def transform_ppm_filter_initial_year(
-    plants: pd.DataFrame,
-    year: Quantity,
+    plants: pd.DataFrame, year: Quantity
 ) -> pd.DataFrame:
     """Removes power plants that exist outside of the given initial year.
 
@@ -134,9 +103,7 @@ def transform_ppm_filter_initial_year(
 
 
 def transform_ppm_add_nuts(
-    plants: pd.DataFrame,
-    nuts_file: str,
-    nuts_level: Optional[int] = 2,
+    plants: pd.DataFrame, nuts_file: str, nuts_level: Optional[int] = 2
 ) -> pd.DataFrame:
     """Assign NUTS regions to powerplants using point data (lat, lon).
 
@@ -173,8 +140,8 @@ def transform_ppm_add_nuts(
 
 
 def transform_ppm_group_tech_nodes(
-        plants: pd.DataFrame, tech_grouping: dict, node_grouping: Optional[dict] = None
-    ) -> pd.DataFrame:
+    plants: pd.DataFrame, tech_grouping: dict, node_grouping: Optional[dict] = None
+) -> pd.DataFrame:
     """Assign calliope data based on configuration.
 
     TODO: inputs should be yaml files.
@@ -196,11 +163,15 @@ def transform_ppm_group_tech_nodes(
     for tech in tech_cnf.columns:
         fuel = tech_cnf.loc["Fueltype", tech]
         for tech_ppm in tech_cnf.loc["Technology", tech]:
-            plants.loc[(plants.Fueltype == fuel) & (list_ppm_techs_txt == tech_ppm), "techs"] = tech
+            plants.loc[
+                (plants.Fueltype == fuel) & (list_ppm_techs_txt == tech_ppm), "techs"
+            ] = tech
 
     # Assign a calliope node to each power plant.
     if node_grouping is not None:
-        plants = plants.assign(nodes=lomb.transform_series(plants["NUTS_ID"], node_grouping))
+        plants = plants.assign(
+            nodes=lomb.transform_series(plants["NUTS_ID"], node_grouping)
+        )
     else:
         plants = plants.assign(nodes=plants["NUTS_ID"])
 
@@ -212,7 +183,9 @@ def transform_ppm_group_tech_nodes(
     return plants
 
 
-def transform_ppm_capacity_to_calliope(plants: pd.DataFrame, parameter: str, cap_unit: Optional[str]) -> pd.DataFrame:
+def transform_ppm_capacity_to_calliope(
+    plants: pd.DataFrame, parameter: str, cap_unit: Optional[str]
+) -> pd.DataFrame:
     """Assigns a parameter to grouped capacity data.
 
     Capacity will be summed per node and per technology group.
@@ -250,7 +223,9 @@ def main():
     plants = plants.loc[plants.Country.isin(countries)]
     plants = transform_ppm_group_tech_nodes(plants, TECH_GROUPING, NODE_GROUPING)
 
-    calliope_ini_cap = transform_ppm_capacity_to_calliope(plants, "flow_cap_initial", cap_unit="kW")
+    calliope_ini_cap = transform_ppm_capacity_to_calliope(
+        plants, "flow_cap_initial", cap_unit="kW"
+    )
     calliope_ini_cap.pint.dequantify().to_csv(save_path, index=False)
 
 

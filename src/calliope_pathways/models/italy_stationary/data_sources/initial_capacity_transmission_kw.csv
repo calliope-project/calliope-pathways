@@ -1,8 +1,0 @@
-from Lombardi’s study,ac_NORD_to_CNOR,flow_cap_initial,1300000
-from Lombardi’s study,ac_CNOR_to_CSUD,flow_cap_initial,1300000
-from Lombardi’s study,ac_CNOR_to_SARD,flow_cap_initial,300000
-from Lombardi’s study,ac_CSUD_to_SARD,flow_cap_initial,720000
-from Lombardi’s study,ac_CSUD_SUD,flow_cap_initial,4600000
-from Lombardi’s study,ac_SUD_to_SICI,flow_cap_initial,1100000
-Sum of yearly average NTC according to ENTSOe for 2014,ac_NORD_to_EUC,flow_cap_initial,1680000
-Yearly average NTC according to ENTSOe for 2014,ac_SUD_to_GRE,flow_cap_initial,0
