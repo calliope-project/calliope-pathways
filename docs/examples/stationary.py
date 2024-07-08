@@ -34,7 +34,7 @@ calliope.set_log_verbosity("INFO", include_solver_output=False)
 
 # %%
 # Initialise
-model = calliope_pathways.models.italy_stationary()
+model = calliope_pathways.models.italy()
 
 # %% [markdown]
 # ### Assessing the input data

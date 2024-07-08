@@ -198,6 +198,20 @@ constraints:
       final_step:
         - expression: get_val_at_index(timesteps=-1)
 
+  limit_flow_cap_new_max_rate:
+    description: Limit maximum rate of new capacity build-out
+    foreach: [techs, carriers, investsteps]
+    where: flow_cap AND flow_cap_new_max_rate
+    equations:
+      - expression: sum(default_if_empty(flow_cap_new, 0) * available_vintages, over=[vintagesteps, nodes]) <= sum($prev_flow_cap, over=nodes) * flow_cap_new_max_rate
+    sub_expressions:
+      prev_flow_cap:
+        - where: NOT investsteps=get_val_at_index(investsteps=0)
+          expression: roll(flow_cap, investsteps=1)
+        - where: investsteps=get_val_at_index(investsteps=0) AND flow_cap_initial > 0
+          expression: flow_cap_initial
+
+
 variables:
   flow_cap:
     foreach: [nodes, techs, carriers, investsteps]

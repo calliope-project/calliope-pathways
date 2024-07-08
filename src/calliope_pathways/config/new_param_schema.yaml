@@ -91,6 +91,15 @@ techs:
       Sets `source_cap` lower bound in first investment period during pathway optimisation.
     x-unit: power.
 
+  flow_cap_new_max_rate:
+    $ref: "#/$defs/TechParamNullNumber"
+    default: .inf
+    x-type: float
+    title: Rate of new flow capacity deployment.
+    description: >-
+      Sets limit on new flow capacity deployment relative to total capacity in previous investment step.
+    x-unit: fraction.
+
 parameters:
 
   investstep_resolution:

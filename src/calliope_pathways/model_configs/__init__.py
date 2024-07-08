@@ -1,3 +1,1 @@
-from calliope_pathways.model_configs.italy_stationary.pre_processing import (
-    parse_lombardi,
-)
+from calliope_pathways.model_configs.italy.pre_processing import parse_lombardi

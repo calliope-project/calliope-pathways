@@ -42,11 +42,7 @@ INPUT_FILES = {
         "locations": "https://raw.githubusercontent.com/FLomb/Calliope-Italy/power_to_heat/italy_20_regions_v.0.1_heat/calliope_model/model_config/locations.yaml"
     },
     "stationary": {
-        "techs": SRC_DIR
-        / "model_configs"
-        / "italy_stationary"
-        / "model_config"
-        / "techs.yaml"
+        "techs": SRC_DIR / "model_configs" / "italy" / "model_config" / "techs.yaml"
     },
 }
 OUTPUT_FILES = {
@@ -335,10 +331,7 @@ def main(
     first_year: int = 2025,
     final_year: int = 2050,
     investstep_resolution: int = 5,
-    data_dir: str | Path = SRC_DIR
-    / "model_configs"
-    / "italy_stationary"
-    / "data_sources",
+    data_dir: str | Path = SRC_DIR / "model_configs" / "italy" / "data_sources",
     test_figs=False,
 ) -> dict:
 
