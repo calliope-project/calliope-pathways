@@ -189,7 +189,7 @@ techs: # Color scheme is Tol Qual Muted + some extras
 
     # RSE, 2015 values
     cost_flow_cap.data: 1451 # EUR2010/kW
-    cost_om_annual.data: 38 # EUR2010/kW/yr=
+    cost_om_annual.data: 38 # EUR2010/kW/yr
 
   pv:
     name: "Photovoltaic electricity"  # TODO: fix source

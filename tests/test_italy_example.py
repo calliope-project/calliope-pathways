@@ -48,10 +48,10 @@ class TestStationary:
             )
 
 
-class TestDynamic:
+class TestFlowCapNewMaxRate:
     def test_build_model(self):
         """Quick build test of the static italy model."""
-        m = calliope_pathways.models.italy(scenario="dynamic")
+        m = calliope_pathways.models.italy(scenario="flow_cap_new_max_rate")
         m.build()
 
         # Key constraints

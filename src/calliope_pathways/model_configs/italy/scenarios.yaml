@@ -1,37 +1,7 @@
 overrides:
   flow_cap_new_max_rate:
-    techs: # Putting in some indicative values here - not based on any data source
-      import_electricity:
-        flow_cap_new_max_rate:
-          data: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
-          index: [2025, 2030, 2035, 2040, 2045, 2050]
-          dims: investsteps
-      wind:
-        flow_cap_new_max_rate:  # Putting in some indicative values here - not based on any data source
-          data: [0.75, 0.75, 0.75, 1, 1, 1]
-          index: [2025, 2030, 2035, 2040, 2045, 2050]
-          dims: investsteps
-      pv:
-        flow_cap_new_max_rate:  # Putting in some indicative values here - not based on any data source
-          data: [0.75, 0.75, 0.75, 1, 1, 1]
-          index: [2025, 2030, 2035, 2040, 2045, 2050]
-          dims: investsteps
-      coal:
-        flow_cap_new_max_rate:  # Putting in some indicative values here - not based on any data source
-          data: 1
-          index: [2025, 2030, 2035, 2040, 2045, 2050]
-          dims: investsteps
-      ccgt:
-        flow_cap_new_max_rate:  # Putting in some indicative values here - not based on any data source
-          data: 1
-          index: [2025, 2030, 2035, 2040, 2045, 2050]
-          dims: investsteps
-      oil:
-        flow_cap_new_max_rate:  # Putting in some indicative values here - not based on any data source
-          data: 1
-          index: [2025, 2030, 2035, 2040, 2045, 2050]
-          dims: investsteps
-
-
-scenarios:
-  dynamic: [flow_cap_new_max_rate]
+    parameters:
+      flow_cap_new_max_rate:
+        data: 0.75
+        index: [2025, 2030, 2035, 2040, 2045, 2050]
+        dims: investsteps
