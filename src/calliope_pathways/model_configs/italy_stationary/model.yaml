@@ -2,8 +2,6 @@
 import:
   - "model_config/techs.yaml" # This file specifies the model's technologies
   - "model_config/locations.yaml" # This file specifies the model's nodes
-  # - "scenarios.yaml" # Scenario and override group definitions
-
 
 # Model configuration: all settings that affect the built model
 config:
@@ -12,7 +10,7 @@ config:
     # What version of Calliope this model is intended for
     calliope_version: 0.7.0
     # Activate pathways configuration
-    add_math: [../../math/pathways.yaml]
+    add_math: [../../math/pathways.yaml, math.yaml]
     time_resample: "1m"
 
   build:
@@ -40,23 +38,16 @@ parameters:
     dims: costs
   # `bigM` sets the scale of unmet demand, which cannot be too high, otherwise the optimisation will not converge
   bigM: 1e6
-  investstep_resolution:
-    data: 10
-    index: [2020, 2030, 2040, 2050]
-    dims: investsteps
 
 data_sources:
   # Initial setup
-  initial_tech_capacity_params:
+  initial_tech_capacities:
     source: data_sources/initial_capacity_techs_kw.csv
     rows: [nodes, techs, parameters]
     columns: [values]
     drop: values
-  initial_transmission_capacity_params:
-    source: data_sources/initial_capacity_transmission_kw.csv
-    rows: [comment, techs, parameters]
-    drop: comment
-  maximum_capacity_params:
+
+  maximum_tech_capacities:
     source: data_sources/max_capacity_techs_kw.csv
     rows: [nodes, techs, parameters]
     columns: [values]
@@ -70,26 +61,25 @@ data_sources:
     add_dimensions:
       parameters: available_initial_cap
 
-  available_initial_cap_transmission:
-    source: data_sources/investstep_series/available_initial_cap_transmission.csv
-    rows: [techs]
-    columns: investsteps
-    add_dimensions:
-      parameters: available_initial_cap
-
   vintage_availability_techs:
     source: data_sources/investstep_series/available_vintages_techs.csv
     rows: techs
-    columns: [vintagesteps, investsteps]
+    columns: [investsteps, vintagesteps]
     add_dimensions:
       parameters: available_vintages
 
   vintage_availability_transmission:
     source: data_sources/investstep_series/available_vintages_transmission.csv
     rows: techs
-    columns: [vintagesteps, investsteps]
+    columns: [investsteps, vintagesteps]
     add_dimensions:
       parameters: available_vintages
+
+  investstep_resolution:
+    source: data_sources/investstep_series/investstep_resolution.csv
+    rows: investsteps
+    columns: parameters
+
 
   # VRE generation data
   # Opposite to Lombardi's study, we force Hydro inflow use, and allow renewable curtailment
@@ -117,19 +107,12 @@ data_sources:
     drop: [license, reference, comment]
 
   # Import/export cost data
-  electricity_import_cost_flow_out:
-    source: data_sources/timestep_series/import_price_series.csv
+  international_electricity_prices:
+    source: data_sources/timestep_series/electricity_price_series.csv
     rows: timesteps
-    columns: [license, reference, comment, nodes, techs]
+    columns: [license, reference, comment, techs]
     drop: [license, reference, comment]
     add_dimensions:
       costs: monetary
       parameters: cost_flow_out
-  electricity_export_cost_flow_in:
-    source: data_sources/timestep_series/export_price_series.csv
-    rows: timesteps
-    columns: [license, reference, comment, nodes, techs]
-    drop: [license, reference, comment]
-    add_dimensions:
-      costs: monetary
-      parameters: cost_flow_in
+      nodes: [NORD, SUD]

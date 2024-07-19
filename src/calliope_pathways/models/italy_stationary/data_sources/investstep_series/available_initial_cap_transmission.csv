@@ -1,9 +1,0 @@
-techs,2020,2030,2040,2050
-ac_NORD_to_CNOR,1,1,1,1
-ac_CNOR_to_CSUD,1,1,1,1
-ac_CNOR_to_SARD,1,1,1,1
-ac_CSUD_to_SARD,1,1,1,1
-ac_CSUD_SUD,1,1,1,1
-ac_SUD_to_SICI,1,1,1,1
-ac_NORD_to_EUC,1,1,1,1
-ac_SUD_to_GRE,1,1,1,1
