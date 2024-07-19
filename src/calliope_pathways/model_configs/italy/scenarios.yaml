@@ -1,0 +1,7 @@
+overrides:
+  flow_cap_new_max_rate:
+    parameters:
+      flow_cap_new_max_rate:
+        data: 0.75
+        index: [2025, 2030, 2035, 2040, 2045, 2050]
+        dims: investsteps

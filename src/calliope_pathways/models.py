@@ -33,7 +33,7 @@ def national_scale(**kwargs) -> Model:
     )
 
 
-def italy_stationary(
+def italy(
     first_year: int = 2025,
     final_year: int = 2050,
     investstep_resolution: int = 5,
@@ -59,9 +59,7 @@ def italy_stationary(
         }
         override_dict = {**data_source_overrides, **kwargs.pop("override_dict", {})}
         return Model(
-            model_definition=src_dir_ref("model_configs")
-            / "italy_stationary"
-            / "model.yaml",
+            model_definition=src_dir_ref("model_configs") / "italy" / "model.yaml",
             override_dict=override_dict,
             **kwargs,
         )
