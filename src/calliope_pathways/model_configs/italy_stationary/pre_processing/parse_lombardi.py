@@ -119,8 +119,8 @@ def _location_yaml_to_df(
     return yaml_df
 
 
-def _get_lifetime_df(yml_path: str, calliope_version: str = "0.7") -> dict:
-    """Converts a tech yaml into a searchable dataframe."""
+def _get_lifetimes(yml_path: str, calliope_version: str = "0.7") -> dict:
+    """Extracts tech lifetimes from the tech YAML."""
     # Read yaml file
     yaml_data = AttrDict.from_yaml(yml_path)
     if calliope_version == "0.7":
@@ -241,7 +241,7 @@ def parse_available_initial_cap(
         shape_factor (int, optional): Weibull . Defaults to 0.5.
     """
     # get technology lifetimes
-    lifetimes = _get_lifetime_df(tech_yml_path)
+    lifetimes = _get_lifetimes(tech_yml_path)
 
     # fetch available technologies per region
     ini_cap_df = pd.read_csv(ini_cap_csv_path)
@@ -270,7 +270,7 @@ def parse_available_vintages(
     tech_yml_path: str, years: list, year_step: int, option: str = "cut"
 ) -> pd.DataFrame:
     # Get tech lifetimes
-    tech_lifetimes = _get_lifetime_df(tech_yml_path)
+    tech_lifetimes = _get_lifetimes(tech_yml_path)
 
     year_pairs = [(v, y) for y in years for v in years if v >= y]
     columns = pd.MultiIndex.from_tuples(
