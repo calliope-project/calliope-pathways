@@ -317,31 +317,43 @@ global_expressions:
     foreach: [nodes, techs, carriers, costs, investsteps]
     equations:
       - where: flow_cap_new
-        expression: sum($cost_sum * flow_cap_new, over=vintagesteps)
+        expression: sum($cost_sum * flow_cap_new * available_vintages, over=vintagesteps)
 
   cost_investment_storage_cap:
     foreach: [nodes, techs, costs, investsteps]
     equations:
       - where: storage_cap_new
-        expression: sum(cost_storage_cap * storage_cap_new, over=vintagesteps)
+        expression: sum(cost_storage_cap * storage_cap_new * available_vintages, over=vintagesteps)
 
   cost_investment_source_cap:
     foreach: [nodes, techs, costs, investsteps]
     equations:
       - where: source_cap_new
-        expression: sum(cost_source_cap * source_cap_new, over=vintagesteps)
+        expression: sum(cost_source_cap * source_cap_new * available_vintages, over=vintagesteps)
 
   cost_investment_area_use:
     foreach: [nodes, techs, costs, investsteps]
     equations:
       - where: area_use_new
-        expression: sum(cost_area_use * area_use_new, over=vintagesteps)
+        expression: sum(cost_area_use * area_use_new * available_vintages, over=vintagesteps)
 
   cost_investment_purchase:
     foreach: [nodes, techs, costs, investsteps]
 
   cost_investment:
     foreach: [nodes, techs, costs, investsteps]
+    equations:
+      - expression: >
+          $annualisation_weight * (
+            $depreciation_rate * (
+              sum(default_if_empty(cost_investment_flow_cap, 0), over=carriers) +
+              default_if_empty(cost_investment_storage_cap, 0) +
+              default_if_empty(cost_investment_source_cap, 0) +
+              default_if_empty(cost_investment_area_use, 0) +
+              default_if_empty(cost_investment_purchase, 0)
+            ) * (1 + cost_om_annual_investment_fraction)
+            + sum(cost_om_annual * flow_cap_new * available_vintages, over=[carriers, vintagesteps])
+          )
 
   cost:
     foreach: [nodes, techs, costs, investsteps]
