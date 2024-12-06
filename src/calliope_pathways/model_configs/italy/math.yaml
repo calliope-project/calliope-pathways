@@ -1,0 +1,7 @@
+constraints:
+  import_export_match:
+    description: Import/export of electricity into/out of Italy should have the same capacity as they represent transmission lines
+    foreach: [nodes, carriers, investsteps]
+    where: defined(techs=[import_electricity, export_electricity], within=nodes, how=all)
+    equations:
+      - expression: flow_cap[techs=import_electricity] == flow_cap[techs=export_electricity]

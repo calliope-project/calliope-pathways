@@ -51,6 +51,7 @@ tech_groups:
     base_tech: transmission
     lifetime: 40
     flow_out_eff: 0.96
+    available_initial_cap: 1
     cost_interest_rate:
       data: 0.10
       index: monetary
@@ -248,18 +249,38 @@ techs: # Color scheme is Tol Qual Muted + some extras
     color: "#072486"
     base_tech: demand
     carrier_in: electricity
+    flow_cap_initial: 1e12  # very large number - it doesn't actually matter what this technology has as a capacity.
+    available_initial_cap: 1  # always available throughout the investment steps
 
   import_electricity:
     name: "Electricity imports"
     color: '#E68A31'
     base_tech: supply
     carrier_out: electricity
+    lifetime: 40
+    cost_interest_rate:
+      data: 0.10
+      index: monetary
+      dims: costs
+    cost_flow_cap:
+      data: 450   # EUR2010/kW, from Lombardi
+      index: monetary
+      dims: costs
 
   export_electricity:
     name: "Electricity exports"
     color: '#E68A31'
     base_tech: demand
     carrier_in: electricity
+    lifetime: 40
+    cost_interest_rate:
+      data: 0.10
+      index: monetary
+      dims: costs
+    cost_flow_cap:
+      data: 450   # EUR2010/kW, from Lombardi
+      index: monetary
+      dims: costs
 
   ##
   # Transmission
@@ -269,37 +290,34 @@ techs: # Color scheme is Tol Qual Muted + some extras
     inherit: inter_zonal_transmission
     from: NORD
     to: CNOR
+    flow_cap_initial: 1300000  # from Lombardi’s study
   ac_CNOR_to_CSUD:
     inherit: inter_zonal_transmission
     from: CNOR
     to: CSUD
+    flow_cap_initial: 1300000  # from Lombardi’s study
   ac_CNOR_to_SARD:
     inherit: inter_zonal_transmission
     from: CNOR
     to: SARD
+    flow_cap_initial: 300000  # from Lombardi’s study
     cost_flow_cap.data: 1660 # EUR2010/kW, from Lombardi (subsea)
   ac_CSUD_to_SARD:
     inherit: inter_zonal_transmission
     from: CSUD
     to: SARD
+    flow_cap_initial: 720000  # from Lombardi’s study
     cost_flow_cap.data: 750 # EUR2010/kW, from Lombardi (subsea)
     cost_flow_out.data: 0.0022  # EUR2010/kWh, from Lombardi
   ac_CSUD_SUD:
     inherit: inter_zonal_transmission
     from: CSUD
     to: SUD
+    flow_cap_initial: 4600000  # from Lombardi’s study
   ac_SUD_to_SICI:
     inherit: inter_zonal_transmission
     from: SUD
     to: SICI
+    flow_cap_initial: 1100000  # from Lombardi’s study
     cost_flow_cap.data: 636 # EUR2010/kW, from Lombardi (subsea)
     cost_flow_out.data: 0.0022  # EUR2010/kWh, from Lombardi
-  # Outside Italy
-  ac_NORD_to_EUC:
-    inherit: inter_zonal_transmission
-    from: NORD
-    to: EUC
-  ac_SUD_to_GRE:
-    inherit: inter_zonal_transmission
-    from: SUD
-    to: GRE

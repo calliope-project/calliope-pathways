@@ -68,7 +68,7 @@ where = ["src"]
 include = ["calliope_pathways*"]
 
 [tool.setuptools.package-data]
-calliope_pathways = ["models/**/*", "math/*", "config/*", "py.typed"]
+calliope_pathways = ["model_configs/**/*", "math/*", "config/*", "py.typed"]
 
 [tool.setuptools]
 license-files = ["LICENSE"]

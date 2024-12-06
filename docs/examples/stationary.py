@@ -34,14 +34,14 @@ calliope.set_log_verbosity("INFO", include_solver_output=False)
 
 # %%
 # Initialise
-model = calliope_pathways.models.italy_stationary()
+model = calliope_pathways.models.italy()
 
 # %% [markdown]
 # ### Assessing the input data
 #
-# The model can be configured by running the script in `src/calliope_pathways/models/italy_stationary/pre_processing/parse_lombardi.py`.
+# The model can be configured by running the script in `src/calliope_pathways/models/italy/pre_processing/parse_lombardi.py`.
 # It automatically assigns random decommission rates for each technology, accounting for their lifetimes.
-# The number of `vintagesteps` and `investsteps` can be similarly altered.
+# The number of `vintagesteps` and `investsteps` can be altered when calling the model (e.g., `:::python calliope_pathways.models.italy(first_year=2030, investstep_resolution=10)`).
 
 # %%
 model.inputs.investsteps
