@@ -49,9 +49,6 @@ OUTPUT_FILES = {
     "initial_tech_capacities": "initial_capacity_techs_kw.csv",
     "maximum_tech_capacities": "max_capacity_techs_kw.csv",
     "available_initial_cap_techs": "investstep_series/available_initial_cap_techs.csv",
-    "vintage_availability_techs": "investstep_series/available_vintages_techs.csv",
-    "vintage_availability_transmission": "investstep_series/available_vintages_transmission.csv",
-    "investstep_resolution": "investstep_series/investstep_resolution.csv",
 }
 # Technology aggregation
 TECH_GROUPING = {
@@ -312,11 +309,6 @@ def parse_transmission(years: list) -> pd.DataFrame:
     return pd.DataFrame(index=TRANSMISSION_TECHS, columns=columns, data=1)
 
 
-def parse_investstep_resolution(years: list) -> pd.DataFrame:
-    year_df = pd.Series(index=years, data=years).diff().bfill().astype(int)
-    return year_df.rename_axis(index="investsteps").to_frame("investstep_resolution")
-
-
 def _get_years(first_year: int, final_year: int, investstep_resolution: int) -> list:
     if (final_year - first_year) % investstep_resolution != 0:
         raise ValueError(
@@ -334,7 +326,6 @@ def main(
     data_dir: str | Path = SRC_DIR / "model_configs" / "italy" / "data_sources",
     test_figs=False,
 ) -> dict:
-
     data_dir = Path(data_dir)
     investstep_dir = data_dir / "investstep_series"
     investstep_dir.mkdir(exist_ok=True)
@@ -356,19 +347,6 @@ def main(
     )
     avail_ini_cap_df.to_csv(output_files["available_initial_cap_techs"], index=False)
 
-    avail_vint_df = parse_available_vintages(
-        INPUT_FILES["stationary"]["techs"],
-        years,
-        year_step=investstep_resolution,
-        option="share",
-    )
-    avail_vint_df.to_csv(output_files["vintage_availability_techs"])
-
-    avail_transmission = parse_transmission(years)
-    avail_transmission.to_csv(output_files["vintage_availability_transmission"])
-
-    investstep_resolution = parse_investstep_resolution(years)
-    investstep_resolution.to_csv(output_files["investstep_resolution"])
     if test_figs:
         out_dir = Path("outputs")
         out_dir.mkdir(exist_ok=True)

@@ -211,7 +211,6 @@ constraints:
         - where: investsteps=get_val_at_index(investsteps=0) AND flow_cap_initial > 0
           expression: flow_cap_initial
 
-
 variables:
   flow_cap:
     foreach: [nodes, techs, carriers, investsteps]
@@ -302,6 +301,12 @@ variables:
       max: area_use_new_max
 
 global_expressions:
+  available_vintages:
+    foreach: [vintagesteps, investsteps, techs]
+    default: 0
+    equations:
+      - expression: get_vintage_availability(weibull)
+
   flow_out_inc_eff:
     foreach: [nodes, techs, carriers, timesteps, investsteps]
 
@@ -317,25 +322,25 @@ global_expressions:
     foreach: [nodes, techs, carriers, costs, investsteps]
     equations:
       - where: flow_cap_new
-        expression: sum($cost_sum * flow_cap_new * available_vintages, over=vintagesteps)
+        expression: sum($cost_sum * flow_cap_new * get_vintage_availability(weibull), over=vintagesteps)
 
   cost_investment_storage_cap:
     foreach: [nodes, techs, costs, investsteps]
     equations:
       - where: storage_cap_new
-        expression: sum(cost_storage_cap * storage_cap_new * available_vintages, over=vintagesteps)
+        expression: sum(cost_storage_cap * storage_cap_new * get_vintage_availability(weibull), over=vintagesteps)
 
   cost_investment_source_cap:
     foreach: [nodes, techs, costs, investsteps]
     equations:
       - where: source_cap_new
-        expression: sum(cost_source_cap * source_cap_new * available_vintages, over=vintagesteps)
+        expression: sum(cost_source_cap * source_cap_new * get_vintage_availability(weibull), over=vintagesteps)
 
   cost_investment_area_use:
     foreach: [nodes, techs, costs, investsteps]
     equations:
       - where: area_use_new
-        expression: sum(cost_area_use * area_use_new * available_vintages, over=vintagesteps)
+        expression: sum(cost_area_use * area_use_new * get_vintage_availability(weibull), over=vintagesteps)
 
   cost_investment_purchase:
     foreach: [nodes, techs, costs, investsteps]
@@ -352,17 +357,11 @@ global_expressions:
               default_if_empty(cost_investment_area_use, 0) +
               default_if_empty(cost_investment_purchase, 0)
             ) * (1 + cost_om_annual_investment_fraction)
-            + sum(cost_om_annual * flow_cap_new * available_vintages, over=[carriers, vintagesteps])
+            + sum(cost_om_annual * flow_cap_new * get_vintage_availability(weibull), over=[carriers, vintagesteps])
           )
 
   cost:
     foreach: [nodes, techs, costs, investsteps]
-
-  available_vintages:
-    foreach: [vintagesteps, investsteps, techs]
-    default: 0
-    equations:
-      - expression: get_vintage_availability(weibull)
 
   investstep_resolution:
     foreach: [investsteps]

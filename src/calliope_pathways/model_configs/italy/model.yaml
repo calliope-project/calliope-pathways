@@ -31,7 +31,6 @@ config:
       FeasibilityTol: 1e-4
       DualReductions: 0
 
-
 parameters:
   objective_cost_weights:
     data: 1
@@ -62,26 +61,6 @@ data_sources:
     columns: investsteps
     add_dimensions:
       parameters: available_initial_cap
-
-  vintage_availability_techs:
-    source: data_sources/investstep_series/available_vintages_techs.csv
-    rows: techs
-    columns: [investsteps, vintagesteps]
-    add_dimensions:
-      parameters: available_vintages
-
-  vintage_availability_transmission:
-    source: data_sources/investstep_series/available_vintages_transmission.csv
-    rows: techs
-    columns: [investsteps, vintagesteps]
-    add_dimensions:
-      parameters: available_vintages
-
-  investstep_resolution:
-    source: data_sources/investstep_series/investstep_resolution.csv
-    rows: investsteps
-    columns: parameters
-
 
   # VRE generation data
   # Opposite to Lombardi's study, we force Hydro inflow use, and allow renewable curtailment

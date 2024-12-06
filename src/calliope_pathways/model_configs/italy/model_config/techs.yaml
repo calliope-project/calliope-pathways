@@ -45,7 +45,7 @@ tech_groups:
 
   inter_zonal_transmission:
     name: "Transmission intra-zonal electricity"
-    color: '#966F9E'
+    color: "#966F9E"
     carrier_in: electricity
     carrier_out: electricity
     base_tech: transmission
@@ -57,11 +57,11 @@ tech_groups:
       index: monetary
       dims: costs
     cost_flow_out:
-      data: 0.0011  # EUR2010/kWh, from Lombardi
+      data: 0.0011 # EUR2010/kWh, from Lombardi
       index: monetary
       dims: costs
     cost_flow_cap:
-      data: 450   # EUR2010/kW, from Lombardi
+      data: 450 # EUR2010/kW, from Lombardi
       index: monetary
       dims: costs
 
@@ -71,7 +71,7 @@ techs: # Color scheme is Tol Qual Muted + some extras
   ##
   geothermal:
     name: "Traditional geothermal energy"
-    color: '#873737'
+    color: "#873737"
     base_tech: supply
     inherit: cost_dim_setter
     carrier_out: electricity
@@ -82,11 +82,11 @@ techs: # Color scheme is Tol Qual Muted + some extras
 
   hydropower: # merged reservoir+basin and RoR, average values
     name: "Hydropower"
-    color: '#64D7CE'
+    color: "#64D7CE"
     base_tech: supply
     inherit: cost_dim_setter
     carrier_out: electricity
-    include_storage: true  # TODO: unclear how to make this work
+    include_storage: true # TODO: unclear how to make this work
     source_unit: per_cap
     source_eff: 0.635
     lifetime: 55
@@ -97,7 +97,7 @@ techs: # Color scheme is Tol Qual Muted + some extras
 
   waste:
     name: "Waste to energy plant"
-    color: '#6A0241'
+    color: "#6A0241"
     base_tech: supply
     inherit: cost_dim_setter
     carrier_out: electricity
@@ -113,7 +113,7 @@ techs: # Color scheme is Tol Qual Muted + some extras
 
   bioenergy:
     name: "Biogas, biofuel and biomass electricity generation"
-    color: '#5AA24D'
+    color: "#5AA24D"
     base_tech: supply
     inherit: cost_dim_setter
     carrier_out: electricity
@@ -128,8 +128,8 @@ techs: # Color scheme is Tol Qual Muted + some extras
     cost_flow_out.data: 0.0177 # EUR2010/kWh
 
   oil:
-    name: 'Oil and other fossil fuels plant'
-    color: '#000000'
+    name: "Oil and other fossil fuels plant"
+    color: "#000000"
     base_tech: supply
     inherit: cost_dim_setter
     carrier_out: electricity
@@ -145,8 +145,8 @@ techs: # Color scheme is Tol Qual Muted + some extras
     cost_om_annual.data: 32 # EUR2010/kW/yr
 
   coal:
-    name: 'Coal plant'
-    color: '#5A5A5A'
+    name: "Coal plant"
+    color: "#5A5A5A"
     base_tech: supply
     inherit: cost_dim_setter
     carrier_out: electricity
@@ -162,8 +162,8 @@ techs: # Color scheme is Tol Qual Muted + some extras
     cost_om_annual.data: 32 # EUR2010/kW/yr
 
   ccgt:
-    name: 'Combined cycle gas turbine'
-    color: '#A5A5A5'
+    name: "Combined cycle gas turbine"
+    color: "#A5A5A5"
     base_tech: supply
     inherit: cost_dim_setter
     carrier_out: electricity
@@ -179,8 +179,8 @@ techs: # Color scheme is Tol Qual Muted + some extras
     cost_om_annual.data: 10.5 # EUR2010/kW/yr
 
   wind:
-    name: 'On-shore wind electricity'  # TODO: fix source
-    color: '#47D154'
+    name: "On-shore wind electricity" # TODO: fix source
+    color: "#47D154"
     base_tech: supply
     inherit: cost_dim_setter
     carrier_out: electricity
@@ -192,8 +192,8 @@ techs: # Color scheme is Tol Qual Muted + some extras
     cost_om_annual.data: 38 # EUR2010/kW/yr
 
   pv:
-    name: "Photovoltaic electricity"  # TODO: fix source
-    color: '#DDCC77'
+    name: "Photovoltaic electricity" # TODO: fix source
+    color: "#DDCC77"
     base_tech: supply
     inherit: cost_dim_setter
     carrier_out: electricity
@@ -206,7 +206,7 @@ techs: # Color scheme is Tol Qual Muted + some extras
 
   battery_li:
     name: "Li-ion battery storage"
-    color: '#882255'
+    color: "#882255"
     base_tech: storage
     inherit: cost_dim_setter
     carrier_in: electricity
@@ -238,7 +238,7 @@ techs: # Color scheme is Tol Qual Muted + some extras
     lifetime: 50
 
     # RSE, average of 2020 (no 2015 data)
-    cost_storage_cap.data:  3218 # EUR2010/kWh storage capacity
+    cost_storage_cap.data: 3218 # EUR2010/kWh storage capacity
     cost_om_annual.data: 45 # EUR2010/kW/yr
 
   ##
@@ -249,12 +249,12 @@ techs: # Color scheme is Tol Qual Muted + some extras
     color: "#072486"
     base_tech: demand
     carrier_in: electricity
-    flow_cap_initial: 1e12  # very large number - it doesn't actually matter what this technology has as a capacity.
-    available_initial_cap: 1  # always available throughout the investment steps
+    flow_cap_initial: 1e12 # very large number - it doesn't actually matter what this technology has as a capacity.
+    available_initial_cap: 1 # always available throughout the investment steps
 
   import_electricity:
     name: "Electricity imports"
-    color: '#E68A31'
+    color: "#E68A31"
     base_tech: supply
     carrier_out: electricity
     lifetime: 40
@@ -263,13 +263,13 @@ techs: # Color scheme is Tol Qual Muted + some extras
       index: monetary
       dims: costs
     cost_flow_cap:
-      data: 450   # EUR2010/kW, from Lombardi
+      data: 450 # EUR2010/kW, from Lombardi
       index: monetary
       dims: costs
 
   export_electricity:
     name: "Electricity exports"
-    color: '#E68A31'
+    color: "#E68A31"
     base_tech: demand
     carrier_in: electricity
     lifetime: 40
@@ -278,7 +278,7 @@ techs: # Color scheme is Tol Qual Muted + some extras
       index: monetary
       dims: costs
     cost_flow_cap:
-      data: 450   # EUR2010/kW, from Lombardi
+      data: 450 # EUR2010/kW, from Lombardi
       index: monetary
       dims: costs
 
@@ -290,34 +290,34 @@ techs: # Color scheme is Tol Qual Muted + some extras
     inherit: inter_zonal_transmission
     from: NORD
     to: CNOR
-    flow_cap_initial: 1300000  # from Lombardi’s study
+    flow_cap_initial: 1300000 # from Lombardi’s study
   ac_CNOR_to_CSUD:
     inherit: inter_zonal_transmission
     from: CNOR
     to: CSUD
-    flow_cap_initial: 1300000  # from Lombardi’s study
+    flow_cap_initial: 1300000 # from Lombardi’s study
   ac_CNOR_to_SARD:
     inherit: inter_zonal_transmission
     from: CNOR
     to: SARD
-    flow_cap_initial: 300000  # from Lombardi’s study
+    flow_cap_initial: 300000 # from Lombardi’s study
     cost_flow_cap.data: 1660 # EUR2010/kW, from Lombardi (subsea)
   ac_CSUD_to_SARD:
     inherit: inter_zonal_transmission
     from: CSUD
     to: SARD
-    flow_cap_initial: 720000  # from Lombardi’s study
+    flow_cap_initial: 720000 # from Lombardi’s study
     cost_flow_cap.data: 750 # EUR2010/kW, from Lombardi (subsea)
-    cost_flow_out.data: 0.0022  # EUR2010/kWh, from Lombardi
+    cost_flow_out.data: 0.0022 # EUR2010/kWh, from Lombardi
   ac_CSUD_SUD:
     inherit: inter_zonal_transmission
     from: CSUD
     to: SUD
-    flow_cap_initial: 4600000  # from Lombardi’s study
+    flow_cap_initial: 4600000 # from Lombardi’s study
   ac_SUD_to_SICI:
     inherit: inter_zonal_transmission
     from: SUD
     to: SICI
-    flow_cap_initial: 1100000  # from Lombardi’s study
+    flow_cap_initial: 1100000 # from Lombardi’s study
     cost_flow_cap.data: 636 # EUR2010/kW, from Lombardi (subsea)
-    cost_flow_out.data: 0.0022  # EUR2010/kWh, from Lombardi
+    cost_flow_out.data: 0.0022 # EUR2010/kWh, from Lombardi

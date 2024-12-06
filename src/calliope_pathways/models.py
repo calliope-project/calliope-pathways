@@ -27,9 +27,13 @@ for key, new_params in new_schema.items():
 def national_scale(**kwargs) -> Model:
     """Returns the built-in national-scale example model."""
 
-    return Model(
-        model_definition=src_dir_ref("model_configs") / "national_scale" / "model.yaml",
-        **kwargs,
+    return _add_vintagesteps(
+        Model(
+            model_definition=src_dir_ref("model_configs")
+            / "national_scale"
+            / "model.yaml",
+            **kwargs,
+        )
     )
 
 
@@ -58,11 +62,13 @@ def italy(
             f"data_sources.{k}.source": v.as_posix() for k, v in source_dirs.items()
         }
         override_dict = {**data_source_overrides, **kwargs.pop("override_dict", {})}
-        return Model(
+        model = Model(
             model_definition=src_dir_ref("model_configs") / "italy" / "model.yaml",
             override_dict=override_dict,
             **kwargs,
         )
+
+        return _add_vintagesteps(model)
 
 
 def load(
@@ -84,4 +90,11 @@ def load(
     if add_pathways_math:
         math = AttrDict.from_yaml(src_dir_ref("math") / "pathways.yaml")
         model.math.union(math, allow_override=True)
+    return _add_vintagesteps(model)
+
+
+def _add_vintagesteps(model: Model) -> Model:
+    model._model_data = model._model_data.assign_coords(
+        {"vintagesteps": model._model_data.coords["investsteps"].values}
+    )
     return model
