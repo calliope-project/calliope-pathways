@@ -89,15 +89,3 @@ techs:
     description: >-
       Sets limit on new flow capacity deployment relative to total capacity in previous investment step.
     x-unit: fraction.
-
-parameters:
-
-  investstep_resolution:
-    $ref: "#/$defs/TechParamNullNumber"
-    default: 1
-    x-type: float
-    title: Per-investment step weighting.
-    description: >-
-      The weighting to give to each investment-step in the objective function.
-      This usually refers to the number of years that one investment step represents (e.g. 10 years for the steps [2030, 2040, 2050]).
-    x-unit: years.

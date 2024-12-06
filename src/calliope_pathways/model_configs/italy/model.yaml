@@ -39,6 +39,7 @@ parameters:
     dims: costs
   # `bigM` sets the scale of unmet demand, which cannot be too high, otherwise the optimisation will not converge
   bigM: 1e6
+  initial_year: 2020
 
 data_sources:
   # Initial setup

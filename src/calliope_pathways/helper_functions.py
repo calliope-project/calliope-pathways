@@ -12,21 +12,21 @@ class GetVintageAvailability(ParsingHelperFunction):
     #:
     ALLOWED_IN = ["expression"]
 
-    def _weibull_func(self, year_diff: xr.DataArray) -> xr.DataArray:
+    def _weibull_func(self, age: xr.DataArray) -> xr.DataArray:
         shape = self._input_data.get("shape", 1)
         gamma = scipy.special.gamma(1 + 1 / shape)
         availability = np.exp(
-            -((year_diff / self._input_data.lifetime.fillna(np.inf)) ** shape)
+            -((age / self._input_data.lifetime.fillna(np.inf)) ** shape)
             * (gamma**shape)
         )
         return availability.fillna(0)
 
-    def _linear_func(self, year_diff: xr.DataArray) -> xr.DataArray:
-        availability = 1 - (year_diff / self._input_data.lifetime)
+    def _linear_func(self, age: xr.DataArray) -> xr.DataArray:
+        availability = 1 - (age / self._input_data.lifetime)
         return availability.clip(min=0)
 
-    def _step_func(self, year_diff: xr.DataArray) -> xr.DataArray:
-        life_diff = self._input_data.lifetime - year_diff
+    def _step_func(self, age: xr.DataArray) -> xr.DataArray:
+        life_diff = self._input_data.lifetime - age
         availability = (life_diff).clip(min=0) / life_diff
         return availability
 
@@ -70,22 +70,22 @@ class GetVintageAvailability(ParsingHelperFunction):
         Returns:
             xr.DataArray: Array of vintage availabilities as fractions. Any index items referring to vintage year > investment year are nullified.
         """
-        year_diff = (
+        age = (
             self._input_data.investsteps.dt.year - self._input_data.vintagesteps.dt.year
         )
-        year_diff_no_negative = year_diff.where(year_diff >= 0)
+        age_no_negative = age.where(age >= 0)
         match method:
             case "weibull":
-                availability = self._weibull_func(year_diff_no_negative)
+                availability = self._weibull_func(age_no_negative)
             case "linear":
-                availability = self._linear_func(year_diff_no_negative)
+                availability = self._linear_func(age_no_negative)
             case "step":
-                availability = self._step_func(year_diff_no_negative)
+                availability = self._step_func(age_no_negative)
             case _:
                 raise ValueError(
                     f"Cannot get vintage availability with `method`: {method}"
                 )
-        return availability.where(year_diff_no_negative.notnull()).fillna(0)
+        return availability.where(age_no_negative.notnull()).fillna(0)
 
 
 class Resolution(ParsingHelperFunction):
@@ -119,5 +119,13 @@ class Year(ParsingHelperFunction):
     def as_math_string(self, array: str) -> str:
         return f"year({array})"
 
-    def as_array(self, array: xr.DataArray) -> xr.DataArray:
-        return array.dt.year
+    def as_array(self, dimension: str) -> xr.DataArray:
+        """Return year associated with each model timeseries dimension values
+
+        Args:
+            dimension (str): Model input data dimension from which to extract years.
+
+        Returns:
+            xr.DataArray: Year per input data dimension value.
+        """
+        return self._input_data[dimension].dt.year

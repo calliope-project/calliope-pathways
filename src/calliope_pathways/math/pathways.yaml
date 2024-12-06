@@ -358,23 +358,18 @@ global_expressions:
   cost:
     foreach: [nodes, techs, costs, investsteps]
 
-  age:
-    foreach: [vintagesteps, investsteps]
-    equations:
-      - expression: year(investsteps) - year(vintagesteps)
-
   available_vintages:
     foreach: [vintagesteps, investsteps, techs]
-    where: age >= 0
+    default: 0
     equations:
       - expression: get_vintage_availability(weibull)
 
   investstep_resolution:
     foreach: [investsteps]
     equations:
-      - where: investsteps=get_val_at_index(investsteps, 0)
-        expression: get_val_at_index(year(investsteps), 1) - initial_year
-      - where: NOT investsteps=get_val_at_index(investsteps, 0)
+      - where: investsteps=get_val_at_index(investsteps=0)
+        expression: year(investsteps) - initial_year
+      - where: NOT investsteps=get_val_at_index(investsteps=0)
         expression: year(investsteps) - roll(year(investsteps), investsteps=1)
 
 objectives:
