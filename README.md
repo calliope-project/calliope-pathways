@@ -9,24 +9,17 @@ The main branch contains the most up-to-date version of the models and the math;
 
 ## Install
 
-You can install calliope pathways in one of two ways:
+You can install calliope pathways as a user or developer:
 
 As a user:
 
 ```shell
-mamba env create -f environment.yml
+mamba create -n calliope-pathways -c conda-forge/label/calliope_dev -c conda-forge --file requirements/base.txt
 mamba activate calliope-pathways
-```
-
-As a developer on WINDOWS:
-
-```shell
-mamba create -n calliope-pathways-dev -c conda-forge/label/calliope_dev -c conda-forge --file requirements/base.txt --file requirements/dev.txt
-mamba activate calliope-pathways-dev
 pip install --no-deps -e .
 ```
 
-As a developer on UNIX:
+As a developer:
 
 ```shell
 mamba create -n calliope-pathways-dev -c conda-forge/label/calliope_dev -c conda-forge --file requirements/base.txt --file requirements/dev.txt

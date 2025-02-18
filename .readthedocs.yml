@@ -1,6 +1,6 @@
 version: 2
 conda:
-  environment: environment.yml
+  environment: requirements/base.txt
 build:
   os: ubuntu-22.04
   tools:
@@ -8,6 +8,7 @@ build:
   jobs:
     post_create_environment:
       - mamba install coin-or-cbc --file requirements/dev.txt
+      - pip install --no-deps .
       - python -m ipykernel install --user --name calliope_docs_pathways
 
 mkdocs:
