@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import requests
 from calliope import AttrDict
+from calliope_pathways import util, parse_ppm
 
 SRC_DIR = Path(importlib.resources.files("calliope_pathways"))
 # TODO: this could be a yaml file + schema... although it may be too specific
@@ -36,7 +37,6 @@ TRANSMISSION_TECHS = [
 # <- Model setup <-
 
 # -> Parsing setup -> DO NOT MODIFY!
-BASIC_V07_COLS = ["nodes", "techs", "parameters", "values"]
 INPUT_FILES = {
     "Calliope-Italy": {
         "locations": "https://raw.githubusercontent.com/FLomb/Calliope-Italy/power_to_heat/italy_20_regions_v.0.1_heat/calliope_model/model_config/locations.yaml"
@@ -156,31 +156,6 @@ def _weibull(
     return wb
 
 
-def transform_series(series: pd.Series, grouping: dict, dtype="string") -> pd.Series:
-    """Use a grouping dictionary to transform a pandas Series.
-
-    Groupings are defined as {new_name:[old_name, ..., other_oldname],...}.
-
-    Args:
-        df (pd.Series): dataframe with the column to transform.
-        grouping (dict): grouping to use for the transformation.
-        dtype (str, optional): dtype to set for the new data series. Defaults to "string".
-
-    Raises:
-        ValueError: grouping was not exhaustive (not all original values covered).
-
-    Returns:
-        pd.Series: transformed data series.
-    """
-    transformed = pd.Series(np.nan, index=series.index, dtype=dtype)
-
-    for new, old_group in grouping.items():
-        transformed.loc[series.isin(old_group)] = new
-    if any(pd.isna(transformed)):
-        raise ValueError(f"Missing values while transforming {series}.")
-    return transformed
-
-
 def parse_initial_cap(loc_yml_path: str, calliope_version="0.6.8") -> pd.DataFrame:
     """Extract initial installed capacity (2015 values)."""
     yml_loc = AttrDict.from_yaml_string(requests.get(loc_yml_path).text)
@@ -196,20 +171,20 @@ def parse_initial_cap(loc_yml_path: str, calliope_version="0.6.8") -> pd.DataFra
         raise ValueError("Empty numeric parameter values in parsed Lombardi data.")
 
     df_loc_tech = df_loc_tech.assign(
-        nodes=transform_series(df_loc_tech["lombardi_loc"], NODE_GROUPING)
+        nodes=util.transform_series(df_loc_tech["lombardi_loc"], NODE_GROUPING)
     )
     df_loc_tech = df_loc_tech.assign(
-        techs=transform_series(df_loc_tech["lombardi_item"], TECH_GROUPING)
+        techs=util.transform_series(df_loc_tech["lombardi_item"], TECH_GROUPING)
     )
     df_loc_tech = df_loc_tech.assign(
-        parameters=transform_series(
+        parameters=util.transform_series(
             df_loc_tech["lombardi_param"], PARAM_INI_CAP_GROUPING
         )
     )
 
     # build initial capacity datafile
     df_ini_cap = df_loc_tech.groupby(["nodes", "techs", "parameters"]).sum()["values"]
-    df_ini_cap = df_ini_cap.reset_index()[BASIC_V07_COLS]
+    df_ini_cap = df_ini_cap.reset_index()[util.BASIC_V07_COLS]
 
     return df_ini_cap
 
