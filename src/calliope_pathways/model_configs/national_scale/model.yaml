@@ -9,10 +9,10 @@ config:
     name: National-scale example model
     # What version of Calliope this model is intended for
     calliope_version: 0.7.0
-    add_math: [../../math/pathways.yaml]
     time_resample: "24h"
 
   build:
+    add_math: [../../math/pathways.yaml]
     ensure_feasibility: true # Switches on the "unmet demand" constraint
     mode: plan # Choices: plan, operate
 
@@ -32,30 +32,30 @@ parameters:
     index: [2020, 2030, 2040, 2050]
     dims: investsteps
 
-data_sources:
+data_tables:
   csp_source:
-    source: data_sources/time_varying_params.csv
+    data: data_tables/time_varying_params.csv
     rows: timesteps
     columns: [comment, nodes, techs, parameters]
     drop: comment
 
   demand:
-    source: data_sources/demand.csv
+    data: data_tables/demand.csv
     rows: timesteps
     columns: [nodes, techs, parameters, investsteps]
 
   # Changes in investment costs per investment step.
   pathway_techs_costs_monetary:
-    source: data_sources/techs_costs_monetary.csv
+    data: data_tables/techs_costs_monetary.csv
     rows: [techs, parameters]
     columns: vintagesteps
-    add_dimensions:
+    add_dims:
       costs: monetary
 
   # An idea for better handling of "decommissioning", by splitting the available capacity between investment steps
   vintage_availability:
-    source: data_sources/vintage_availability.csv
+    data: data_tables/vintage_availability.csv
     rows: techs
     columns: [vintagesteps, investsteps]
-    add_dimensions:
+    add_dims:
       parameters: available_vintages

@@ -10,58 +10,51 @@ testpaths = ["tests"]
 
 filterwarnings = []
 
-[tool.black]
-line-length = 88
-skip-magic-trailing-comma = true
-target-version = ['py310', 'py311', 'py312']
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.github
-  | \.mypy_cache
-  | \.pytest_cache
-  | \.vscode
-  | _build
-  | build
-  | dist
-  | .*\.egg-info
-
-  # directories without python source files
-  | requirements
-)/
-'''
-
 [tool.ruff]
 line-length = 88
-select = ["E", "F", "I", "Q", "W"]
+
+[tool.ruff.format]
+exclude = [".*.egg-info", "requirements/**"]
+skip-magic-trailing-comma = true
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "Q", "W", "D", "PT", "UP"]
 # line too long; Black will handle these
 ignore = ["E501"]
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.isort]
+split-on-trailing-comma = false
+
+[tool.ruff.lint.mccabe]
 # Unlike Flake8, default to a complexity level of 10.
 max-complexity = 10
 
 # Ignore `E402` (import violations) and `F401` (unused imports) in all `__init__.py` files
-[tool.ruff.per-file-ignores]
-"__init__.py" = ["E402", "F401"]
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402", "F401", "D104"]
 "*.ipynb" = ["E402"]
+"tests/*" = ["D"]
+"docs/examples/*" = ["D"]
 
-[tool.ruff.flake8-quotes]
+[tool.ruff.lint.flake8-quotes]
 docstring-quotes = "double"
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[tool.ruff.pycodestyle]
+[tool.ruff.lint.pycodestyle]
 max-doc-length = 200
 ignore-overlong-task-comments = true
 
 [tool.codespell]
-skip = 'tests/**/*,**/*.ipynb'
+skip = 'tests/*.py,AUTHORS'
 count = ''
 quiet-level = 3
+ignore-words-list = "socio-economic"  # British english spelling that isn't covered by the inbuilt dictionary
+
+[tool.mypy]
+ignore_missing_imports = true
+files = "src/"
 
 [tool.setuptools.packages.find]
 where = ["src"]

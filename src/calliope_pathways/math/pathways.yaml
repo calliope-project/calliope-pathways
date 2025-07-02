@@ -113,13 +113,7 @@ constraints:
   flow_capacity_max_purchase_milp:
     foreach: [nodes, techs, carriers, investsteps]
 
-  flow_capacity_min_purchase_milp:
-    foreach: [nodes, techs, carriers, investsteps]
-
   storage_capacity_max_purchase_milp:
-    foreach: [nodes, techs, investsteps]
-
-  storage_capacity_min_purchase_milp:
     foreach: [nodes, techs, investsteps]
 
   unit_capacity_max_systemwide_milp:
@@ -308,7 +302,7 @@ global_expressions:
   flow_in_inc_eff:
     foreach: [nodes, techs, carriers, timesteps, investsteps]
 
-  cost_var:
+  cost_operation_variable:
     foreach: [nodes, techs, costs, timesteps, investsteps]
 
   # these are now decision variables
@@ -342,17 +336,24 @@ global_expressions:
 
   cost_investment:
     foreach: [nodes, techs, costs, investsteps]
+
+  cost_investment_annualised:
+    foreach: [nodes, techs, costs, investsteps]
+
+  cost_operation_fixed:
+    title: Total fixed operation costs
+    description: >-
+      The fixed, annual operation costs of a technology, which are calculated relative to investment costs.
+      If the modeling period is not equal to one full year, this will be scaled accordingly.
+    default: 0
+    unit: cost
+    foreach: [nodes, techs, costs, investsteps]
+    where: cost_investment AND (cost_om_annual OR cost_om_annual_investment_fraction)
     equations:
-      - expression: >
+      - expression: >-
           $annualisation_weight * (
-            $depreciation_rate * (
-              sum(default_if_empty(cost_investment_flow_cap, 0), over=carriers) +
-              default_if_empty(cost_investment_storage_cap, 0) +
-              default_if_empty(cost_investment_source_cap, 0) +
-              default_if_empty(cost_investment_area_use, 0) +
-              default_if_empty(cost_investment_purchase, 0)
-            ) * (1 + cost_om_annual_investment_fraction)
-            + sum(cost_om_annual * flow_cap_new * available_vintages, over=[carriers, vintagesteps])
+            sum(cost_om_annual * flow_cap, over=[carriers, vintagesteps]) +
+            cost_investment * cost_om_annual_investment_fraction
           )
 
   cost:

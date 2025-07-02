@@ -11,10 +11,11 @@ config:
     # What version of Calliope this model is intended for
     calliope_version: 0.7.0
     # Activate pathways configuration
-    add_math: [../../math/pathways.yaml, math.yaml]
     time_resample: "1m"
+    broadcast_param_data: true
 
   build:
+    add_math: [../../math/pathways.yaml, math.yaml]
     ensure_feasibility: false # Switches on the "unmet demand" constraint
     mode: plan # Choices: plan, operate
 
@@ -40,80 +41,39 @@ parameters:
   # `bigM` sets the scale of unmet demand, which cannot be too high, otherwise the optimisation will not converge
   bigM: 1e6
 
-data_sources:
-  # Initial setup
-  initial_tech_capacities:
-    source: data_sources/initial_capacity_techs_kw.csv
-    rows: [nodes, techs, parameters]
-    columns: [values]
-    drop: values
-
-  maximum_tech_capacities:
-    source: data_sources/max_capacity_techs_kw.csv
-    rows: [nodes, techs, parameters]
-    columns: [values]
-    drop: values
-
-  # Pathway setup
-  available_initial_cap_techs:
-    source: data_sources/investstep_series/available_initial_cap_techs.csv
-    rows: [nodes, techs]
-    columns: investsteps
-    add_dimensions:
-      parameters: available_initial_cap
-
-  vintage_availability_techs:
-    source: data_sources/investstep_series/available_vintages_techs.csv
-    rows: techs
-    columns: [investsteps, vintagesteps]
-    add_dimensions:
-      parameters: available_vintages
-
-  vintage_availability_transmission:
-    source: data_sources/investstep_series/available_vintages_transmission.csv
-    rows: techs
-    columns: [investsteps, vintagesteps]
-    add_dimensions:
-      parameters: available_vintages
-
-  investstep_resolution:
-    source: data_sources/investstep_series/investstep_resolution.csv
-    rows: investsteps
-    columns: parameters
-
-
+data_tables:
   # VRE generation data
   # Opposite to Lombardi's study, we force Hydro inflow use, and allow renewable curtailment
   pv_source_max: # allows curtailment
-    source: data_sources/timestep_series/pv_series.csv
+    data: data_tables/timestep_series/pv_series.csv
     rows: timesteps
     columns: [license, reference, comment, nodes, techs, parameters]
     drop: [license, reference, comment]
   wind_source_max: # allows curtailment
-    source: data_sources/timestep_series/wind_series.csv
+    data: data_tables/timestep_series/wind_series.csv
     rows: timesteps
     columns: [license, reference, comment, nodes, techs, parameters]
     drop: [license, reference, comment]
   hydro_source_use_equals: # forces resource use
-    source: data_sources/timestep_series/hydro_reservoir_series.csv
+    data: data_tables/timestep_series/hydro_reservoir_series.csv
     rows: timesteps
     columns: [license, reference, comment, nodes, techs, parameters]
     drop: [license, reference, comment]
 
   # Demand data
   electricity_demand_source_use_equals:
-    source: data_sources/timestep_series/regional_demand_series.csv
+    data: data_tables/timestep_series/regional_demand_series.csv
     rows: timesteps
     columns: [license, reference, comment, nodes, techs, parameters]
     drop: [license, reference, comment]
 
   # Import/export cost data
   international_electricity_prices:
-    source: data_sources/timestep_series/electricity_price_series.csv
+    data: data_tables/timestep_series/electricity_price_series.csv
     rows: timesteps
     columns: [license, reference, comment, techs]
     drop: [license, reference, comment]
-    add_dimensions:
+    add_dims:
       costs: monetary
       parameters: cost_flow_out
       nodes: [NORD, SUD]

@@ -4,21 +4,19 @@
 # Copyright (C) since 2024 Calliope pathways contributors listed in AUTHORS.
 # Licensed under the MIT License (see LICENSE file).
 
-"""
-Models that can be loaded directly into a session.
-"""
+"""Models that can be loaded directly into a session."""
 
 import tempfile
 from pathlib import Path
 
-from calliope import AttrDict
+from calliope import io
 from calliope.model import Model
 from calliope.util import schema
 
 from calliope_pathways.model_configs import parse_lombardi
 from calliope_pathways.util import src_dir_ref
 
-new_schema = AttrDict.from_yaml(src_dir_ref("config") / "new_param_schema.yaml")
+new_schema = io.read_rich_yaml(src_dir_ref("config") / "new_param_schema.yaml")
 
 for key, new_params in new_schema.items():
     schema.update_model_schema(key, new_params, allow_override=False)
@@ -26,7 +24,6 @@ for key, new_params in new_schema.items():
 
 def national_scale(**kwargs) -> Model:
     """Returns the built-in national-scale example model."""
-
     return Model(
         model_definition=src_dir_ref("model_configs") / "national_scale" / "model.yaml",
         **kwargs,
@@ -51,15 +48,20 @@ def italy(
         Model: Initialised Italy Calliope Model.
     """
     with tempfile.TemporaryDirectory() as tmp_dir:
-        source_dirs = parse_lombardi.main(
-            first_year, final_year, investstep_resolution, data_dir=tmp_dir
+        model_dir = src_dir_ref("model_configs") / "italy"
+        data_source_overrides = parse_lombardi.main(
+            first_year,
+            final_year,
+            investstep_resolution,
+            data_dir=tmp_dir,
+            model_dir=model_dir,
         )
-        data_source_overrides = {
-            f"data_sources.{k}.source": v.as_posix() for k, v in source_dirs.items()
+        override_dict = {
+            **{"data_tables": data_source_overrides},
+            **kwargs.pop("override_dict", {}),
         }
-        override_dict = {**data_source_overrides, **kwargs.pop("override_dict", {})}
         return Model(
-            model_definition=src_dir_ref("model_configs") / "italy" / "model.yaml",
+            model_definition=model_dir / "model.yaml",
             override_dict=override_dict,
             **kwargs,
         )
@@ -76,12 +78,12 @@ def load(
             If True, the model math will be updated with pre-defined `calliope_pathways` math.
             Set to False if you already have a reference to the math file in your `init.add_math` configuration.
             Defaults to True.
+        **kwargs: calliope `init` config kwargs.
 
     Keyword Args: Passed on to `calliope.Model`.
     """
-
     model = Model(model_definition=model_definition, **kwargs)
     if add_pathways_math:
-        math = AttrDict.from_yaml(src_dir_ref("math") / "pathways.yaml")
+        math = io.read_rich_yaml(src_dir_ref("math") / "pathways.yaml")
         model.math.union(math, allow_override=True)
     return model

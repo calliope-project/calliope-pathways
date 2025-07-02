@@ -1,8 +1,6 @@
 # Copyright (C) since 2013 Calliope contributors listed in AUTHORS.
 # Licensed under the Apache 2.0 License (see LICENSE file).
-"""
-Generate LaTeX math to include in the documentation.
-"""
+"""Generate LaTeX math to include in the documentation."""
 
 import importlib.resources
 import logging
@@ -29,7 +27,7 @@ For each [objective](#objective), [constraint](#subject-to) and [global expressi
 
 In the expressions, terms in **bold** font are [decision variables](#decision-variables) and terms in *italic* font are [parameters](#parameters).
 The [decision variables](#decision-variables) and [parameters](#parameters) are listed at the end of the page; they also refer back to the global expressions / constraints in which they are used.
-Those parameters which are defined over time (`timesteps`) in the expressions can be defined by a user as a single, time invariant value, or as a timeseries that is [loaded from file or dataframe](../creating/data_sources.md).
+Those parameters which are defined over time (`timesteps`) in the expressions can be defined by a user as a single, time invariant value, or as a timeseries that is [loaded from file or dataframe](../creating/data_tables.md).
 
 !!! note
 
@@ -40,7 +38,7 @@ Those parameters which are defined over time (`timesteps`) in the expressions ca
 
 
 def on_files(files: list, config: dict, **kwargs):
-
+    """Act on files."""
     base_model = generate_national_scale_example_math_model()
     write_file(
         "pathways.yaml",
@@ -65,6 +63,15 @@ def write_file(
     files: list[File],
     config: dict,
 ) -> None:
+    """Write math doc to file.
+
+    Args:
+        filename (str): Filename.
+        description (str): Math description, used as a preamble.
+        model (calliope.Model): Calliope model containing math.
+        files (list[File]): mkdocs files.
+        config (dict): mkdocs config.
+    """
     title = model.inputs.attrs["name"] + " math"
 
     output_file = (Path("math") / filename).with_suffix(".md")
@@ -111,10 +118,7 @@ def write_file(
 
 
 def generate_national_scale_example_math_model() -> calliope.Model:
-    """Generate model with documentation for the base math
-
-    Args:
-        model_config (dict): Calliope model config.
+    """Generate model with documentation for the base math.
 
     Returns:
         calliope.Model: Base math model to use in generating math docs.

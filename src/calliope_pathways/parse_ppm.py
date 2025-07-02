@@ -8,27 +8,40 @@ Related functions have been removed, as linear or logarithmic regressions do not
 adequate when filling these values.
 """
 
-from typing import Optional, Literal
+from typing import Literal
+
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pint_pandas  # noqa: F401, unused but necessary for unit handling.
 import powerplantmatching as ppm
-import pycountry
 from pint import Quantity
 
 from calliope_pathways import util
+
 u = pint_pandas.PintType.ureg
 NUTS_FILE = "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_20M_2021_4326.geojson"
 TECH_GROUPING = {
     # Assumption: "Other" powerplants use gas
-    "ccgt": {"Fueltype": ["Natural Gas", "Other"], "Technology": ["CCGT", "Steam Turbine", "Not Found", "Unknown", "Combustion Engine"]},
+    "ccgt": {
+        "Fueltype": ["Natural Gas", "Other"],
+        "Technology": [
+            "CCGT",
+            "Steam Turbine",
+            "Not Found",
+            "Unknown",
+            "Combustion Engine",
+        ],
+    },
     "hydropower": {
         "Fueltype": ["Hydro"],
         "Technology": ["Run-Of-River", "Reservoir", "Unknown"],
     },
     "wind_onshore": {"Fueltype": ["Wind"], "Technology": ["Onshore"]},
-    "wind_offshore": {"Fueltype": ["Wind"], "Technology": ["Offshore", "Offshore Mount Unknown", "Offshore Hard Mount"]},
+    "wind_offshore": {
+        "Fueltype": ["Wind"],
+        "Technology": ["Offshore", "Offshore Mount Unknown", "Offshore Hard Mount"],
+    },
     "pv": {"Fueltype": ["Solar"], "Technology": ["Pv", "Assumed Pv", "Unknown"]},
     "battery_phs": {
         "Fueltype": ["Hydro"],
@@ -39,10 +52,19 @@ TECH_GROUPING = {
         "Fueltype": ["Waste"],
         "Technology": ["Steam Turbine", "Unknown", "CCGT"],
     },
-    "bioenergy": {"Fueltype": ["Bioenergy"], "Technology": ["Steam Turbine", "Unknown", "Combustion Engine"]},
+    "bioenergy": {
+        "Fueltype": ["Bioenergy"],
+        "Technology": ["Steam Turbine", "Unknown", "Combustion Engine"],
+    },
     "oil": {"Fueltype": ["Oil"], "Technology": ["Steam Turbine", "Unknown"]},
-    "geothermal": {"Fueltype": ["Geothermal"], "Technology": ["Steam Turbine", "Unknown"]},
-    "coal": {"Fueltype": ["Hard Coal", "Lignite"], "Technology": ["CCGT", "Steam Turbine", "Unknown"]},
+    "geothermal": {
+        "Fueltype": ["Geothermal"],
+        "Technology": ["Steam Turbine", "Unknown"],
+    },
+    "coal": {
+        "Fueltype": ["Hard Coal", "Lignite"],
+        "Technology": ["CCGT", "Steam Turbine", "Unknown"],
+    },
     "nuclear": {"Fueltype": ["Nuclear"], "Technology": ["Steam Turbine"]},
 }
 
@@ -84,6 +106,7 @@ def transform_ppm_filter_initial_year(
     """Removes power plants that exist outside of the given initial year.
 
     Args:
+        plants: Table of power plants.
         year (Quantity): system year to extract (future/decommissioned facilities will be removed).
 
     Returns:
@@ -96,7 +119,7 @@ def transform_ppm_filter_initial_year(
 
 
 def transform_ppm_add_nuts(
-    plants: pd.DataFrame, nuts_file: str, nuts_level: Optional[int] = 2
+    plants: pd.DataFrame, nuts_file: str, nuts_level: int | None = 2
 ) -> pd.DataFrame:
     """Assign NUTS regions to powerplants using point data (lat, lon).
 
@@ -110,7 +133,9 @@ def transform_ppm_add_nuts(
     """
     # Get necessary regional data.
     spatial_df = gpd.read_file(nuts_file)
-    countries_alpha2 = util.convert_country(plants["Country"].unique(), "name", "alpha_2")
+    countries_alpha2 = util.convert_country(
+        plants["Country"].unique(), "name", "alpha_2"
+    )
     spatial_df = spatial_df.loc[spatial_df["CNTR_CODE"].isin(countries_alpha2)]
     spatial_df = spatial_df.loc[spatial_df["LEVL_CODE"] == nuts_level]
 
@@ -124,7 +149,9 @@ def transform_ppm_add_nuts(
 
 
 def transform_ppm_group_tech_nodes(
-    plants: pd.DataFrame, tech_grouping: dict, node_grouping: dict | Literal["Country"] | None
+    plants: pd.DataFrame,
+    tech_grouping: dict,
+    node_grouping: dict | Literal["Country"] | None,
 ) -> pd.DataFrame:
     """Assign calliope data based on configuration.
 
@@ -146,7 +173,9 @@ def transform_ppm_group_tech_nodes(
     tech_cnf = pd.DataFrame.from_dict(tech_grouping)
     for tech in tech_cnf.columns:
         plants.loc[
-            (plants.Fueltype.isin(tech_cnf.loc["Fueltype", tech])) & (list_ppm_techs_txt.isin(tech_cnf.loc["Technology", tech])), "techs"
+            (plants.Fueltype.isin(tech_cnf.loc["Fueltype", tech]))
+            & (list_ppm_techs_txt.isin(tech_cnf.loc["Technology", tech])),
+            "techs",
         ] = tech
 
     # Assign a calliope node to each power plant.
@@ -172,7 +201,7 @@ def transform_ppm_group_tech_nodes(
 
 
 def transform_ppm_capacity_to_calliope(
-    plants: pd.DataFrame, parameter: str, cap_unit: Optional[str]
+    plants: pd.DataFrame, parameter: str, cap_unit: str | None
 ) -> pd.DataFrame:
     """Assigns a parameter to grouped capacity data.
 
@@ -181,6 +210,7 @@ def transform_ppm_capacity_to_calliope(
     Args:
         plants (pd.DataFrame): powerplantmatching data, preprocessed for grouping.
         parameter (str, optional): parameter to set.
+        cap_unit (str | None): capacity unit used.
 
     Returns:
         pd.DataFrame: capacity data in calliope format.
@@ -196,14 +226,34 @@ def transform_ppm_capacity_to_calliope(
 
     return calliope_plants
 
-def parse(countries: list[str], year: int, agg: Literal["Country"] | dict | None = "Country") -> pd.DataFrame:
+
+def parse(
+    countries: list[str], year: int, agg: Literal["Country"] | dict | None = "Country"
+) -> pd.DataFrame:
+    """Parse initial capacities using powerplantmatching.
+
+    Args:
+        countries (list[str]): Countries in ISO3 format.
+        year (int): Year of powerplantmatching database to use as the initial year.
+        agg (Literal[Country] | dict | None, optional):
+            How to aggregate powerplantmatching data.
+            If `Country`, uses national aggregations.
+            If a dict, a mapping from NUTS_ID to model region.
+            If None, all power plants will be returned without aggregation.
+            Defaults to "Country".
+
+    Returns:
+        pd.DataFrame: _description_
+    """
     year *= u.year
 
     plants = extract_ppm()
 
     plants = transform_ppm_filter_initial_year(plants, year)
     plants = transform_ppm_add_nuts(plants, NUTS_FILE, nuts_level=2)
-    plants = plants.loc[plants.Country.isin(util.convert_country(countries, "alpha_3", "name"))]
+    plants = plants.loc[
+        plants.Country.isin(util.convert_country(countries, "alpha_3", "name"))
+    ]
     plants = transform_ppm_group_tech_nodes(plants, TECH_GROUPING, agg)
 
     calliope_ini_cap = transform_ppm_capacity_to_calliope(

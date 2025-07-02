@@ -19,7 +19,7 @@ nodes:
       battery:
 
   region1_1:
-    inherit: csp_regions
+    template: csp_regions
     latitude: 41
     longitude: -2
     techs:
@@ -30,7 +30,7 @@ nodes:
         area_use_initial: 10000
 
   region1_2:
-    inherit: csp_regions
+    template: csp_regions
     latitude: 39
     longitude: -1
     techs:
@@ -41,7 +41,7 @@ nodes:
         area_use_initial: 200000
 
   region1_3:
-    inherit: csp_regions
+    template: csp_regions
     latitude: 39
     longitude: -2
     techs:

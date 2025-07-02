@@ -3,7 +3,7 @@
 ##
 
 
-tech_groups:
+templates:
   cost_dim_setter:
     cost_flow_in:
       data: null
@@ -34,7 +34,7 @@ techs:
     name: "Combined cycle gas turbine"
     color: "#E37A72"
     base_tech: supply
-    inherit: cost_dim_setter
+    template: cost_dim_setter
     carrier_out: power
     flow_out_eff: 0.5
     flow_cap_max: 40000 # kW
@@ -61,7 +61,7 @@ techs:
     name: "Concentrating solar power"
     color: "#F9CF22"
     base_tech: supply
-    inherit: cost_dim_setter
+    template: cost_dim_setter
     carrier_out: power
     source_unit: per_area
     include_storage: True
@@ -87,7 +87,7 @@ techs:
     name: "Battery storage"
     color: "#3B61E3"
     base_tech: storage
-    inherit: cost_dim_setter
+    template: cost_dim_setter
     carrier_in: power
     carrier_out: power
     storage_cap_max: .inf
@@ -122,12 +122,12 @@ techs:
 
 
   region1_to_region2:
-    from: region1
-    to: region2
+    link_from: region1
+    link_to: region2
     name: "AC power transmission"
     color: "#8465A9"
     base_tech: transmission
-    inherit: cost_dim_setter
+    template: cost_dim_setter
     carrier_in: power
     carrier_out: power
     flow_out_eff: 0.85
@@ -140,15 +140,15 @@ techs:
     flow_cap_initial: 5000
 
   region1_to_region1_1:
-    from: region1
-    to: region1_1
-    inherit: free_transmission
+    link_from: region1
+    link_to: region1_1
+    template: free_transmission
   region1_to_region1_2:
-    from: region1
-    to: region1_2
-    inherit: free_transmission
+    link_from: region1
+    link_to: region1_2
+    template: free_transmission
   region1_to_region1_3:
-    from: region1
-    to: region1_3
-    inherit: free_transmission
+    link_from: region1
+    link_to: region1_3
+    template: free_transmission
 
