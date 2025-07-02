@@ -9,7 +9,7 @@
 import tempfile
 from pathlib import Path
 
-from calliope import io
+from calliope import attrdict, io
 from calliope.model import Model
 from calliope.util import schema
 
@@ -82,8 +82,13 @@ def load(
 
     Keyword Args: Passed on to `calliope.Model`.
     """
-    model = Model(model_definition=model_definition, **kwargs)
+    kwargs = attrdict.AttrDict(kwargs)
+    existing_add_math = kwargs.get_key("override_dict.config.build.add_math", [])
     if add_pathways_math:
-        math = io.read_rich_yaml(src_dir_ref("math") / "pathways.yaml")
-        model.math.union(math, allow_override=True)
+        existing_add_math.append(
+            str((src_dir_ref("math") / "pathways.yaml").absolute())
+        )
+    kwargs.set_key("override_dict.config.build.add_math", existing_add_math)
+    model = Model(model_definition=model_definition, **kwargs)
+
     return model

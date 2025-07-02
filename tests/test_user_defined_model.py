@@ -1,5 +1,6 @@
 import calliope
 import pytest
+
 from calliope_pathways import models
 
 
@@ -9,7 +10,9 @@ def load_example_model():
         model_path = (
             calliope.examples._EXAMPLE_MODEL_DIR / "national_scale" / "model.yaml"
         )
-        return models.load(model_path, add_pathways_math=add_pathways_math)
+        loaded = models.load(model_path, add_pathways_math=add_pathways_math)
+        loaded.build()
+        return loaded
 
     return _load_example_model
 

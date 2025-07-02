@@ -6,15 +6,15 @@
 templates:
   cost_dim_setter:
     cost_flow_in:
-      data: null
+      data: [null]
       index: monetary
       dims: costs
     cost_flow_out:
-      data: null
+      data: [null]
       index: monetary
       dims: costs
     cost_interest_rate:
-      data: 0.10
+      data: [0.10]
       index: monetary
       dims: costs
 
@@ -74,7 +74,7 @@ techs:
     flow_cap_max: 20000
     lifetime: 24
 
-    cost_flow_out.data: 0.002
+    cost_flow_out.data: [0.002]
 
     available_initial_cap:
       data: [1, 0.9, 0.3, 0]
@@ -134,7 +134,7 @@ techs:
     lifetime: 25
     flow_cap_max: 10000
 
-    cost_flow_out.data: 0.002
+    cost_flow_out.data: [0.002]
 
     # pathways-specific
     flow_cap_initial: 5000

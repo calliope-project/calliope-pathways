@@ -51,7 +51,7 @@ nodes:
         source_cap_initial: 30000
         area_use_initial: 3000000
 
-node_groups:
+templates:
   csp_regions:
     techs:
       csp:

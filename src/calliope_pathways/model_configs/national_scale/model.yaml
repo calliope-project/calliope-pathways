@@ -28,7 +28,7 @@ parameters:
   # `bigM` sets the scale of unmet demand, which cannot be too high, otherwise the optimisation will not converge
   bigM: 1e6
   investstep_resolution:
-    data: 10
+    data: [10, 10, 10, 10]
     index: [2020, 2030, 2040, 2050]
     dims: investsteps
 
