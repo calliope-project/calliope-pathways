@@ -228,7 +228,10 @@ def transform_ppm_capacity_to_calliope(
 
 
 def parse(
-    countries: list[str], year: int, agg: Literal["Country"] | dict | None = "Country"
+    countries: list[str],
+    year: int,
+    agg: Literal["Country"] | dict | None = "Country",
+    tech_grouping: dict = TECH_GROUPING,
 ) -> pd.DataFrame:
     """Parse initial capacities using powerplantmatching.
 
@@ -241,9 +244,12 @@ def parse(
             If a dict, a mapping from NUTS_ID to model region.
             If None, all power plants will be returned without aggregation.
             Defaults to "Country".
+        tech_grouping (dict, optional):
+            How to group PPM technologies into technologies used in the Calliope model.
+            The default grouping is based on technologies used in the example Italian model.
 
     Returns:
-        pd.DataFrame: _description_
+        pd.DataFrame: Initial capacities per model technology and node.
     """
     year *= u.year
 
@@ -254,7 +260,7 @@ def parse(
     plants = plants.loc[
         plants.Country.isin(util.convert_country(countries, "alpha_3", "name"))
     ]
-    plants = transform_ppm_group_tech_nodes(plants, TECH_GROUPING, agg)
+    plants = transform_ppm_group_tech_nodes(plants, tech_grouping, agg)
 
     calliope_ini_cap = transform_ppm_capacity_to_calliope(
         plants, "flow_cap_initial", cap_unit="kW"
