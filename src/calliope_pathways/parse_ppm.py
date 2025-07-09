@@ -191,11 +191,16 @@ def transform_ppm_group_tech_nodes(
         )
     else:
         plants = plants.assign(nodes=plants["NUTS_ID"])
-
-    if any(plants["techs"].isna()):
-        raise ValueError("Not all technologies could be translated to Calliope.")
-    if any(plants["nodes"].isna()):
-        raise ValueError("Not all NUTS regions could be translated to Calliope.")
+    missing_techs = plants[plants["techs"].isna()]
+    missing_nodes = plants[plants["nodes"].isna()]
+    if not missing_techs.empty:
+        raise ValueError(
+            f"Not all technologies could be translated to Calliope: {missing_techs}"
+        )
+    if not missing_nodes.empty:
+        raise ValueError(
+            f"Not all NUTS regions could be translated to Calliope: {missing_nodes}"
+        )
 
     return plants
 
