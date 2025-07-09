@@ -84,7 +84,7 @@ def get_lifetimes(yml_path: str, calliope_version: str = "0.7") -> dict:
         return {
             k.split(".")[0]: v
             for k, v in yaml_data["techs"].as_dict_flat().items()
-            if k.endswith("lifetime")
+            if k.endswith(".lifetime")
         }
     else:
         raise ValueError(f"Version {calliope_version} not supported.")
@@ -98,7 +98,7 @@ def get_base_tech(yml_path: str, calliope_version: str = "0.7") -> dict:
         return {
             k.split(".")[0]: v
             for k, v in yaml_data["techs"].as_dict_flat().items()
-            if k == "base_tech"
+            if k.endswith(".base_tech")
         }
     else:
         raise ValueError(f"Version {calliope_version} not supported.")
