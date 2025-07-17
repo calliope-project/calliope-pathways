@@ -113,7 +113,19 @@ constraints:
   flow_capacity_max_purchase_milp:
     foreach: [nodes, techs, carriers, investsteps]
 
+  flow_capacity_minimum:
+    foreach: [nodes, techs, carriers, investsteps]
+
   storage_capacity_max_purchase_milp:
+    foreach: [nodes, techs, investsteps]
+
+  storage_capacity_minimum:
+    foreach: [nodes, techs, investsteps]
+
+  area_use_minimum:
+    foreach: [nodes, techs, investsteps]
+
+  source_capacity_minimum:
     foreach: [nodes, techs, investsteps]
 
   unit_capacity_max_systemwide_milp:
